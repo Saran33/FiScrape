@@ -63,7 +63,7 @@ ROBOTSTXT_OBEY = True
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   'tutorial.pipelines.TutorialPipeline': 300,
+   'tutorial.pipelines.SaveQuotesPipeline': 300,
 }
 
 CONNECTION_STRING = 'sqlite:///scrapy_quotes.db'

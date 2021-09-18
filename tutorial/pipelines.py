@@ -11,9 +11,9 @@ from sqlalchemy.orm import sessionmaker
 from scrapy.exceptions import DropItem
 from tutorial.models import Quote, Author, Tag, db_connect, create_table
 
-class TutorialPipeline:
-    def process_item(self, item, spider):
-        return item
+# class TutorialPipeline:
+#     def process_item(self, item, spider):
+#         return item
 
 class SaveQuotesPipeline(object):
     def __init__(self):

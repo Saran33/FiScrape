@@ -7,12 +7,15 @@ from scrapy.utils.project import get_project_settings
 
 Base = declarative_base()
 
+CONNECTION_STRING = 'sqlite:///scrapy_quotes.db'
+
 def db_connect():
     """
     Performs database connection using database settings from settings.py.
     Returns sqlalchemy engine instance
     """
-    return create_engine(get_project_settings().get("CONNECTION_STRING"))
+    # return create_engine(get_project_settings().get("CONNECTION_STRING"))
+    return create_engine(CONNECTION_STRING)
 
 
 def create_table(engine):
