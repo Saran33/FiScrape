@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 setup(
     name='FiScrape',
     packages=find_packages(include=['tutorial']),
-    version='0.1.1',
+    version='0.1.2',
 	author='Saran Connolly',
     description='Financial news scraping and processing.',
 	long_description=long_description,
