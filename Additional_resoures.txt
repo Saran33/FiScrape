@@ -1,1 +1,30 @@
 https://towardsdatascience.com/a-minimalist-end-to-end-scrapy-tutorial-part-i-11e350bcdec0
+
+scrapy shell http://quotes.toscrape.com/
+response.xpath("//div[@class='quote']").get()
+quotes = response.xpath("//div[@class='quote']")
+quotes[0].css(".text::text").getall()
+quotes[0].css(".author::text").getall()
+Crtl-D to exit shell
+Ctrl-L (clear output)
+
+scrapy crawl quotes
+scrapy crawl quotes -o quotes.json
+
+# The 'next' button:
+<li class="next">
+                <a href="/page/2/">Next <span aria-hidden="true">→</span></a>
+            </li>
+
+scrapy shell http://quotes.toscrape.com/
+response.css('li.next a::attr(href)').get()
+
+# Individul authors:
+scrapy shell http://quotes.toscrape.com/
+response.css('.author + a::attr(href)').get()
+
+#Access DB:
+sqlite3 scrapy_quotes.db
+.tables
+select * from quote limit 3;
+.quit
