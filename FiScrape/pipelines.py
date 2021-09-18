@@ -9,14 +9,14 @@ from itemadapter import ItemAdapter
 
 from sqlalchemy.orm import sessionmaker
 from scrapy.exceptions import DropItem
-from tutorial.models import Quote, Author, Tag, db_connect, create_table
+from FiScrape.models import Article, Author, Tag, db_connect, create_table
 import logging
 
-# class TutorialPipeline:
+# class FiScrapePipeline:
 #     def process_item(self, item, spider):
 #         return item
 
-class SaveQuotesPipeline(object):
+class SaveArticlesPipeline(object):
     def __init__(self):
         """
         Initializes database connection and sessionmaker
@@ -28,27 +28,27 @@ class SaveQuotesPipeline(object):
 
 
     def process_item(self, item, spider):
-        """Save quotes in the database
+        """Save articles in the database
         This method is called for every item pipeline component
         """
         session = self.Session()
-        quote = Quote()
+        article = Article()
         author = Author()
         tag = Tag()
         author.name = item["author_name"]
         author.birthday = item["author_birthday"]
         author.bornlocation = item["author_bornlocation"]
         author.bio = item["author_bio"]
-        quote.quote_content = item["quote_content"]
+        article.article_content = item["article_content"]
 
         # check whether the author exists
         exist_author = session.query(Author).filter_by(name = author.name).first()
         if exist_author is not None:  # the current author exists
-            quote.author = exist_author
+            article.author = exist_author
         else:
-            quote.author = author
+            article.author = author
 
-        # check whether the current quote has tags or not
+        # check whether the current article has tags or not
         if "tags" in item:
             for tag_name in item["tags"]:
                 tag = Tag(name=tag_name)
@@ -56,10 +56,10 @@ class SaveQuotesPipeline(object):
                 exist_tag = session.query(Tag).filter_by(name = tag.name).first()
                 if exist_tag is not None:  # the current tag exists
                     tag = exist_tag
-                quote.tags.append(tag)
+                article.tags.append(tag)
 
         try:
-            session.add(quote)
+            session.add(article)
             session.commit()
 
         except:
@@ -85,9 +85,9 @@ class DuplicatesPipeline(object):
 
     def process_item(self, item, spider):
         session = self.Session()
-        exist_quote = session.query(Quote).filter_by(quote_content = item["quote_content"]).first()
+        exist_quote = session.query(Article).filter_by(quote_content = item["quote_content"]).first()
         session.close()
-        if exist_quote is not None:  # the current quote exists
+        if exist_quote is not None:  # the current article exists
             raise DropItem("Duplicate item found: %s" % item["quote_content"])
         else:
             return item
