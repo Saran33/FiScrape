@@ -189,3 +189,4 @@ class FT_ArticleItem(Item):
 #     #     output_processor=TakeFirst()
 #     #     )
 #     tags = Field()
+
