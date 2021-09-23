@@ -28,3 +28,83 @@ sqlite3 scrapy_quotes.db
 .tables
 select * from quote limit 3;
 .quit
+
+https://www.zyte.com/pricing/
+
+scrapy shell "https://www.ft.com/search?q=bitcoin&sort=date/"
+
+response.xpath("//div[@class='o-teaser o-teaser--article o-teaser--small o-teaser--has-image js-teaser']").get()
+snippets = response.xpath("//div[@class='o-teaser o-teaser--article o-teaser--small o-teaser--has-image js-teaser']")
+snippets = response.css('div.o-teaser.o-teaser--article.o-teaser--small.o-teaser--has-image.js-teaser')
+
+# published_date
+snippets[0].css('time.o-teaser__timestamp-date::datetime').getall()
+snippets[0].css('div.o-teaser__timestamp time.o-teaser__timestamp-date::attr(datetime)').getall()
+
+snippets[0].css('div.o-teaser__heading::attr(text)').getall()
+snippets[0].css('div.o-teaser__heading').getall()
+snippets[0].css("div.o-teaser__heading").getall()
+snippets[0].xpath("//div[@class='o-teaser__heading']/a/text()").getall()
+snippets[0].css("div.o-teaser__heading a.js-teaser-heading-link::text").getall()
+snippets[0].css("a.js-teaser-heading-link *::text").getall()
+headline = snippets[0].css("a.js-teaser-heading-link ::text").getall()
+headline = "".join(snippets[0].css("a.js-teaser-heading-link *::text").extract())
+
+
+standfirst = snippets[0].css("p.o-teaser__standfirst ::text").getall()
+standfirst = "".join(snippets[0].css("p.o-teaser__standfirst ::text").extract())
+
+tags = snippets[0].css("a.o-teaser__tag::text").getall()
+
+link = snippets[0].css("div.o-teaser__heading a::attr(href)").get()
+
+last_date = response.xpath('//div[@class="o-teaser__timestamp time.o-teaser__timestamp-date"]/a/datetime()')[-1].extract()
+first_date = snippets[0].css('div.o-teaser__timestamp time.o-teaser__timestamp-date::attr(datetime)').get()
+first_date = response.css('div.o-teaser__timestamp time.o-teaser__timestamp-date::attr(datetime)').extract_first()
+last_date = snippets[-1].css('div.o-teaser__timestamp time.o-teaser__timestamp-date::attr(datetime)').get()
+last_date = response.css('div.o-teaser__timestamp time.o-teaser__timestamp-date::attr(datetime)')[-1].extract()
+
+snippets[0].css('div.o-teaser__timestamp time.o-teaser__timestamp-date::attr(datetime)')
+
+next_page = snippets[0]("a.search-pagination__next-page a::attr(href)").get()
+snippets[0].xpath("//a[@class='search-pagination__next-page o-buttons o-buttons--secondary o-buttons-icon o-buttons-icon--arrow-right o-buttons--big o-buttons-icon--icon-only']/@href").getall()
+a = snippets[0].xpath("//a[@class='search-pagination__next-page o-buttons o-buttons--secondary o-buttons-icon o-buttons-icon--arrow-right o-buttons--big o-buttons-icon--icon-only']").getall()
+
+snippets[0].follow(a, callback=self.parse)
+
+next_page = response.xpath("//a[@class='search-pagination__next-page o-buttons o-buttons--secondary o-buttons-icon o-buttons-icon--arrow-right o-buttons--big o-buttons-icon--icon-only']/@href")
+
+scrapy shell 'https://www.ft.com/content/6f3075c1-e3c4-49b5-9717-3e00cb9e6615/' --nolog
+
+content = article__content
+response.xpath("//div[@class='article__content']").get()
+content = response.xpath("//div[@class='article__content']")
+article = response.xpath("//article")
+
+authors = article.css("a.n-content-tag--author::text").getall()
+author_urls = article.css("a.n-content-tag--author::attr(href)").getall()
+
+scrapy shell 'https://www.ft.com/laurence-fletcher/' --nolog
+author = response.xpath("//div[@class='sub-header sub-header--author']")
+bio = author.css("div.sub-header__strapline::text").get()
+
+email = response.xpath("//a[@class='sub-header__content__link sub-header__content__link--email-address']/@href").get()
+twitter = response.xpath("//a[@class='sub-header__content__link sub-header__content__link--twitter-handle']/@href").get()
+
+<a class="search-pagination__next-page o-buttons o-buttons--secondary o-buttons-icon o-buttons-icon--arrow-right o-buttons--big o-buttons-icon--icon-only" href="?q=bitcoin&amp;page=2&amp;sort=date" rel="nofollow" data-trackable="next-page">
+						<span class="o-buttons-icon__label">Next page</span>
+					</a>
+
+scrapy crawl ft
+scrapy crawl ft -o output.csv -t csv
+
+#Access DB:
+sqlite3 FiScrape.db
+.tables
+.schema article
+select * from article limit 3;
+.quit
+
+
+
+cssselect.parser.SelectorSyntaxError: Expected ident, got <DELIM '/' at 6>
