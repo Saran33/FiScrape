@@ -5,6 +5,7 @@ from FiScrape.items import FT_ArticleItem, convert_ft_dt # ArticleItem
 from datetime import date, datetime
 from pytz import timezone
 from dateutil import parser
+from ln_meta import ft_user, ft_pass
 
 todays_date = date.today()
 today = todays_date.strftime("%B %-d, %Y")
@@ -88,12 +89,14 @@ class FT_Spider(scrapy.Spider):
         article_item = response.meta['article_item']
         loader = ItemLoader(item=article_item, response=response)
         #loader.add_css('article_content', '.article__content ::text')
+        authors = response.css("a.n-content-tag--author::text").getall()
+        print (authors)
         loader.add_css('author_names', "a.n-content-tag--author::text")
         author_urls = response.css("a.n-content-tag--author::attr(href)").getall()
         # go to the author page and pass the current collected article info
         # self.logger.info('Get author page url')
         for author_url in author_urls:
-            yield response.follow(author_url, self.parse_author, meta={'article_item': article_item})
+            yield response.follow(author_url, self.parse_author, meta={'article_item': article_item}) #, loader.load_item()
         # yield loader.load_item(), [response.follow(author_url, self.parse_author, meta={'article_item': article_item}) for author_url in author_urls]
 
     def parse_author(self, response):
