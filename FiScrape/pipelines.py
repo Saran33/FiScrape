@@ -65,7 +65,6 @@ class SaveArticlesPipeline(object):
         if exist_topic is not None:  # the current topic exists
             topic = exist_topic
         article.topics.append(topic)
-        #print("topic")
 
         #source = Source(name=spider.name)
         source.name = spider.name
@@ -80,18 +79,23 @@ class SaveArticlesPipeline(object):
         if "author_names" in item:
             for author_name in item["author_names"]:
                 author = Author(name=author_name)
-                author.bio = item["author_bio"]
-                author.twitter = item["author_twitter"]
-                author.email = item["author_email"]
-                #author.bias = item["author_bias"]
-                # author.birthday = item["author_birthday"]
-                # author.bornlocation = item["author_bornlocation"]
+                if "author_bio" in item:
+                    author.bio = item["author_bio"]
+                if "author_twitter" in item:
+                    author.twitter = item["author_twitter"]
+                if "author_email" in item:
+                    author.email = item["author_email"]
+                if "author_bias" in item:
+                    author.bias = item["author_bias"]
+                if "author_birthday" in item:
+                    author.birthday = item["author_birthday"]
+                if "author_bornlocation" in item:
+                    author.bornlocation = item["author_bornlocation"]
                 # check whether the author exists
                 exist_author = session.query(Author).filter_by(name = author.name).first()
                 if exist_author is not None:  # the current author exists
                     author = exist_author
                 article.authors.append(author)
-                #print ("article_author")
 
         # check whether the current article has tags or not
         if "tags" in item:
@@ -109,7 +113,6 @@ class SaveArticlesPipeline(object):
 
         except:
             session.rollback()
-            #print ("rollback")
             raise
 
         finally:
@@ -135,7 +138,9 @@ class DuplicatesPipeline(object):
         session.close()
         if exist_article is not None:  # the current article exists
             topic_name = query.capitalize()
-            if topic_name in exist_article.topics:
+            # if topic_name in exist_article.topics:
+            exist_topic = session.query(Topic).filter_by(name = topic_name).first()
+            if exist_topic is not None:  # the current topic exists
                 raise DropItem("Duplicate item found: %s" % item["headline"])
             else:
                 article = exist_article

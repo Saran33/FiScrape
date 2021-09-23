@@ -7,7 +7,7 @@
 
 from scrapy.item import Item, Field
 #from scrapy.loader.processors import MapCompose, TakeFirst
-from itemloaders.processors import MapCompose, TakeFirst, Compose
+from itemloaders.processors import MapCompose, TakeFirst, Compose, Join
 from datetime import datetime
 from dateutil import parser
 # dtt = parser.parse(dt)
@@ -24,15 +24,19 @@ def remove_space(text):
     return text
 
 def extract_headline(text):
-    text = "".join(text)
+    #text = "".join(text)
     #text = text.strip(u'\u201c'u'\u201d')
+    text = text.replace('  ', ' ')
     return text
 
 def extract_standfirst(text):
-    text =  "".join(text)
-    text = text.replace('...“', '').replace('”...', '')
+    #text =  "".join(text)
+    text = text.replace('  ', ' ').replace('...“', '').replace('”...', '.').replace('...', '')
     #text = text.strip(u'\u201c'u'\u201d')
     return text
+
+def add_dots(text):
+    return text + '...'
 
 def convert_date(text):
     """
@@ -84,7 +88,7 @@ class FT_ArticleItem(Item):
     headline = Field(
         input_processor=MapCompose(extract_headline),
         # TakeFirst return the first value not the whole list
-        output_processor=TakeFirst()
+        output_processor=Join()
         )
     # article_content = Field(
     #     input_processor=MapCompose(remove_articles),
@@ -93,8 +97,7 @@ class FT_ArticleItem(Item):
     #     )
     standfirst = Field(
         input_processor=MapCompose(extract_standfirst),
-        # TakeFirst return the first value not the whole list
-        output_processor=TakeFirst()
+        output_processor=Join()
         )
     # category = Field(
     #     input_processor=MapCompose(remove_space),

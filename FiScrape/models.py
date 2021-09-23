@@ -60,11 +60,11 @@ class Article(Base):
     #source = relationship('Source', backref='articles', nullable=False)
     #author_id = Column(Integer, ForeignKey('author.id'))  # Many articles to one author
     authors = relationship('Author', secondary='authors_association',
-        lazy='dynamic', backref="article")  # M-to-M for article and authors
+        lazy='dynamic', backref="article", overlaps="article,authors")  # M-to-M for article and authors
     topics = relationship('Topic', secondary='topics_association',
-         lazy='dynamic', backref="article")  # M-to-M for article and topic
+         lazy='dynamic', backref="article", overlaps="article,topics")  # M-to-M for article and topic
     tags = relationship('Tag', secondary='tags_association',
-        lazy='dynamic', backref="article")  # M-to-M for article and tag
+        lazy='dynamic', backref="article", overlaps="article,tags")  # M-to-M for article and tag
     # snip_blob_id = relationship(Integer, ForeignKey('snip_blob.id'))   # 1-to-1 for article and snip_blob
     # blob_id = relationship(Integer, ForeignKey('blob.id'))  # 1-to-1 for article and blob
     # snip_vader_id = relationship(Integer, ForeignKey('snip_vader.id')) # 1-to-1 for article and snip_vader
@@ -80,7 +80,7 @@ class Topic(Base):
     id = Column(Integer, primary_key=True)
     name = Column('name', String(30), unique=True) #, nullable=False)
     articles = relationship('Article', secondary='topics_association',
-        lazy='dynamic', backref="topic")  # M-to-M for article and topic
+        lazy='dynamic', backref="topic", overlaps="article,topics")  # M-to-M for article and topic
     # def __repr__(self):
     #     return "<{0} Id: {1} - Topic: {2} Headline: {3}>".format(self.__class__name, self.id,
     #             self.name)
@@ -91,30 +91,30 @@ class Source(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column('name', String(50), unique=True) #, nullable=False)
-    # inception = Column('inception', DateTime)
-    # location = Column('location', String(150))
-    # about = Column('about', Text())
-    # bias = Column('bias', Text())  # Add https://www.allsides.com/media-bias/media-bias-ratings?field_featured_bias_rating_value=All&field_news_source_type_tid%5B2%5D=2&field_news_bias_nid_1%5B1%5D=1&field_news_bias_nid_1%5B2%5D=2&field_news_bias_nid_1%5B3%5D=3&field_news_bias_nid_1%5B4%5D=4&title=
+    inception = Column('inception', DateTime, default=None)
+    location = Column('location', String(150), default=None)
+    about = Column('about', Text(), default=None)
+    bias = Column('bias', Text(), default=None)  # Add https://www.allsides.com/media-bias/media-bias-ratings?field_featured_bias_rating_value=All&field_news_source_type_tid%5B2%5D=2&field_news_bias_nid_1%5B1%5D=1&field_news_bias_nid_1%5B2%5D=2&field_news_bias_nid_1%5B3%5D=3&field_news_bias_nid_1%5B4%5D=4&title=
     articles = relationship('Article', backref='source', lazy='dynamic') # One author to many Articles
-    # def __repr__(self):
-    #     # return "<{0} Id: {1} - Name: {2} Bias: {6} About: {5}>".format(self.__class__name, self.id,
-    #     #         self.name, self.bias, self.about)
-    #     return "<{0} Id: {1} - Name: {2}>".format(self.__tablename__, self.id,
-    #             self.name)
+    def __repr__(self):
+        # return "<{0} Id: {1} - Name: {2} Bias: {6} About: {5}>".format(self.__class__name, self.id,
+        #         self.name, self.bias, self.about)
+        return "<{0} Id: {1} - Name: {2}>".format(self.__tablename__, self.id,
+                self.name)
 
 class Author(Base):
     __tablename__ = "author"
 
     id = Column(Integer, primary_key=True)
-    name = Column('name', String(50), unique=True)
-    bio = Column('bio', Text())
-    twitter = Column('twitter', String(36))
-    email = Column('email', String(50))
-    # birthday = Column('birthday', DateTime)
-    # bornlocation = Column('bornlocation', String(150))
-    #articles = relationship('Article', backref='author')  # One author to many Articles
+    name = Column('name', String(50), unique=True, default=None)
+    bio = Column('bio', Text(), default=None)
+    twitter = Column('twitter', String(36), default=None)
+    email = Column('email', String(50), default=None)
+    birthday = Column('birthday', DateTime, default=None)
+    bornlocation = Column('bornlocation', String(150), default=None)
+    # articles = relationship('Article', backref='author')  # One author to many Articles
     articles = relationship('Article', secondary='authors_association',
-        lazy='dynamic', backref="author")  # M-to-M for article and authors
+        lazy='dynamic', backref="author") # , overlaps="article,authors")  # M-to-M for article and authors
     # def __repr__(self):
     #     return "<{0} Id: {1} - Name: {2} Bio: {3} Twitter: {4} Email: {5}>".format(self.__class__name, self.id,
     #             self.name, self.twitter, self.email)
@@ -125,9 +125,9 @@ class Tag(Base):
     __tablename__ = "tag"
 
     id = Column(Integer, primary_key=True)
-    name = Column('name', String(30), unique=True)
+    name = Column('name', String(30), unique=True, default=None)
     articles = relationship('Article', secondary='tags_association',
-        lazy='dynamic', backref="tag")  # M-to-M for article and tag
+        lazy='dynamic', backref="tag") # , overlaps="article,tags")  # M-to-M for article and tag
     # def __repr__(self):
     #     return "<{0} Id: {1} - Name: {2}>".format(self.__class__name, self.id,
     #             self.name)
@@ -137,60 +137,60 @@ class Tag(Base):
 #     # TextBlob, based on the Natural Language ToolKit (NLTK), sentiment scores.
 
 #     id = Column(Integer, primary_key=True)
-#     subjectivity = Column('subjectivity', Float)
-#     polarity = Column('polarity', Float)
+#     subjectivity = Column('subjectivity', Float, default=None)
+#     polarity = Column('polarity', Float, default=None)
 #     article = relationship('Article', uselist=False, backref='snip_blob')  # One SnipBlob to one Article
-#     def __repr__(self):
-#         # return "<{0} Id: {1} - Name: {2} Bias: {6} About: {5}>".format(self.__class__name, self.id,
-#         #         self.name, self.bias, self.about)
-#         return "<{0} Id: {1} - Subjectivity: {2} Polarity: {3} Article Id: {4}>".format(self.__class__name, self.id,
-#                 self.subjectivity, self.polarity, self.article.id)
+# #     def __repr__(self):
+# #         # return "<{0} Id: {1} - Name: {2} Bias: {6} About: {5}>".format(self.__class__name, self.id,
+# #         #         self.name, self.bias, self.about)
+# #         return "<{0} Id: {1} - Subjectivity: {2} Polarity: {3} Article Id: {4}>".format(self.__class__name, self.id,
+# #                 self.subjectivity, self.polarity, self.article.id)
 
 # class Blob(Base):
 #     __tablename__ = "blob"  # TextBlob sentiment scores for the main body
 #     # TextBlob, based on the Natural Language ToolKit (NLTK), sentiment scores.
 
 #     id = Column(Integer, primary_key=True)
-#     subjectivity = Column('subjectivity', Float)
-#     polarity = Column('polarity', Float)
+#     subjectivity = Column('subjectivity', Float, default=None)
+#     polarity = Column('polarity', Float, default=None)
 #     article = relationship('Article', uselist=False, backref='blob')  # One Blob to one Article
-#     def __repr__(self):
-#         # return "<{0} Id: {1} - Name: {2} Bias: {6} About: {5}>".format(self.__class__name, self.id,
-#         #         self.name, self.bias, self.about)
-#         return "<{0} Id: {1} - Subjectivity: {2} Polarity: {3} Article Id: {4}>".format(self.__class__name, self.id,
-#                 self.subjectivity, self.polarity,self.article.id)
+# #     def __repr__(self):
+# #         # return "<{0} Id: {1} - Name: {2} Bias: {6} About: {5}>".format(self.__class__name, self.id,
+# #         #         self.name, self.bias, self.about)
+# #         return "<{0} Id: {1} - Subjectivity: {2} Polarity: {3} Article Id: {4}>".format(self.__class__name, self.id,
+# #                 self.subjectivity, self.polarity,self.article.id)
 
 # class SnipVader(Base):
 #     __tablename__ = "snip_vader" # Vader sentiment scores for the headline and standfirst
 #     # Valence Aware Dictionary and sEntiment Reasoning lexicon-based sentiment scores
 
 #     id = Column(Integer, primary_key=True)
-#     compound = Column('compound', Float)
-#     negative = Column('negative', Float)
-#     neutral = Column('neutral', Float)
-#     positive = Column('positive', Float)
+#     compound = Column('compound', Float, default=None)
+#     negative = Column('negative', Float, default=None)
+#     neutral = Column('neutral', Float, default=None)
+#     positive = Column('positive', Float, default=None)
 #     article = relationship('Article', uselist=False, backref='snip_vader')  # One SnipVader to one Article
-#     def __repr__(self):
-#         # return "<{0} Id: {1} - Name: {2} Bias: {6} About: {5}>".format(self.__class__name, self.id,
-#         #         self.name, self.bias, self.about)
-#         return "<{0} Id: {1} - Compound: {2} Negative: {3} Neutral: {4} Positive: {5} Article Id: {6}>".format(self.__class__name, self.id,
-#                 self.compound, self.negative, self.neutral, self.positive, self.article.id)
+# #     def __repr__(self):
+# #         # return "<{0} Id: {1} - Name: {2} Bias: {6} About: {5}>".format(self.__class__name, self.id,
+# #         #         self.name, self.bias, self.about)
+# #         return "<{0} Id: {1} - Compound: {2} Negative: {3} Neutral: {4} Positive: {5} Article Id: {6}>".format(self.__class__name, self.id,
+# #                 self.compound, self.negative, self.neutral, self.positive, self.article.id)
 
 # class Vader(Base):
 #     __tablename__ = "vader"  # Vader sentiment scores for the main body
 #     # Valence Aware Dictionary and sEntiment Reasoning lexicon-based sentiment scores
 
 #     id = Column(Integer, primary_key=True)
-#     compound = Column('compound', Float)
-#     negative = Column('negative', Float)
-#     neutral = Column('neutral', Float)
-#     positive = Column('positive', Float)
+#     compound = Column('compound', Float, default=None)
+#     negative = Column('negative', Float, default=None)
+#     neutral = Column('neutral', Float, default=None)
+#     positive = Column('positive', Float, default=None)
 #     article = relationship('Article', uselist=False, backref='vader')  # One Vader to one Article
-#     def __repr__(self):
-#         # return "<{0} Id: {1} - Name: {2} Bias: {6} About: {5}>".format(self.__class__name, self.id,
-#         #         self.name, self.bias, self.about)
-#         return "<{0} Id: {1} - Compound: {2} Negative: {3} Neutral: {4} Positive: {5} Article Id: {6}>".format(self.__class__name, self.id,
-#                 self.compound, self.negative, self.neutral, self.positive, self.article.id)
+# #     def __repr__(self):
+# #         # return "<{0} Id: {1} - Name: {2} Bias: {6} About: {5}>".format(self.__class__name, self.id,
+# #         #         self.name, self.bias, self.about)
+# #         return "<{0} Id: {1} - Compound: {2} Negative: {3} Neutral: {4} Positive: {5} Article Id: {6}>".format(self.__class__name, self.id,
+# #                 self.compound, self.negative, self.neutral, self.positive, self.article.id)
 
-# from sqlalchemy.orm import aliased
-# Sentiment = aliased(SnipVader)
+# # from sqlalchemy.orm import aliased
+# # Sentiment = aliased(SnipVader)
