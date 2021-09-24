@@ -21,6 +21,9 @@ def remove_articles(text):
 def remove_space(text):
     # strip the unicode articles
     text = text.replace('  ', ' ')
+    # .lstrip()
+    # .rstrip()
+    # For X- path, you can also use: normalize-space
     return text
 
 def extract_headline(text):
@@ -31,12 +34,28 @@ def extract_headline(text):
 
 def extract_standfirst(text):
     #text =  "".join(text)
-    text = text.replace('  ', ' ').replace('...“', '').replace('”...', '.').replace('...', '')
+    text = text.replace('\n\t\t\t\t\t\t\n\t\t\t\t\t\t', ' ').replace('  ', ' ').replace('   ', ' ').replace('...“', '').replace('”...', '.').replace('...', '')
     #text = text.strip(u'\u201c'u'\u201d')
     return text
 
 def add_dots(text):
     return text + '...'
+
+def clean_text(text):
+    text = text.strip().replace("  ", " ").replace('  ', ' ').replace('  ', ' ')
+    text = ' '.join(text.split())
+    text = text.replace(' .', '. ').replace(' ,', ',')
+    text = (text + '...').replace(' ...', '...').replace('......', '...')
+    text = text.replace('?...', '?').replace('!...', '!').replace('-...', '-')
+    text = text.replace('. .', '.').strip()
+    text = text.replace(':', ': ').replace(':  ', ': ').replace(' ;', ';')
+    text = text.replace('...', '... ').replace(' .', '... ').strip()
+    text = text.replace('“ ', '“').replace(' ”','”').replace(" ’", "’").replace(" ’", "’")
+    text = text.strip().replace("  ", " ").replace('  ', ' ').replace('  ', ' ')
+    text = text.replace(' ... ..', '...').replace('......', '...').replace('..... ..', '...')
+    text = text.replace('......', '...').replace('....', '...')
+    text = text.replace('  ', ' ')
+    return text
 
 def convert_date(text):
     """
@@ -95,9 +114,12 @@ class FT_ArticleItem(Item):
     #     # TakeFirst return the first value not the whole list
     #     output_processor=TakeFirst()
     #     )
+    # standfirst = Field(
+    #     input_processor=MapCompose(extract_standfirst),
+    #     output_processor=Join()
+    #     )
     standfirst = Field(
-        input_processor=MapCompose(extract_standfirst),
-        output_processor=Join()
+        # Processed in pipeline due to limitations of Scrapy processors
         )
     # category = Field(
     #     input_processor=MapCompose(remove_space),

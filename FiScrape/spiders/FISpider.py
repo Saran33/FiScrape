@@ -2,7 +2,7 @@
 import scrapy
 from scrapy.loader import ItemLoader
 from FiScrape.items import FT_ArticleItem, convert_ft_dt # ArticleItem
-from datetime import date, datetime
+from datetime import date, datetime,timedelta
 from pytz import timezone
 from dateutil import parser
 from ln_meta import ft_user, ft_pass
@@ -31,10 +31,30 @@ if start_date == 'y':
 elif start_date== 't':
     start_date = datetime.utcnow()
     start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+elif start_date== 'yd':
+    start_date = datetime.utcnow()
+    start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=1)
 if type(start_date) is str:
     start_date = datetime.strptime(start_date,'%Y-%m-%d')
 start_date = timezone("UTC").localize(start_date)
 print ('Getting articles on: ' + query + '...\n')
+
+# class LoginSpider(scrapy.Spider):
+#     name = 'ftlog'
+#     start_urls = ['http://www.example.com/users/login.php']
+
+#     def parse(self, response):
+#         return scrapy.FormRequest.from_response(
+#             response,
+#             formdata={'username': 'john', 'password': 'secret'},
+#             callback=self.after_login
+#         )
+
+#     def after_login(self, response):
+#         # check login succeed before going on
+#         if "authentication failed" in response.body:
+#             self.logger.error("Login failed")
+#             return
 
 class FT_Spider(scrapy.Spider):
     '''

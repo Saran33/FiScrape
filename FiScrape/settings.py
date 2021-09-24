@@ -16,6 +16,7 @@ NEWSPIDER_MODULE = 'FiScrape.spiders'
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'FiScrape (+http://www.yourdomain.com)'
 USER_AGENT = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
+# Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
@@ -67,6 +68,7 @@ ITEM_PIPELINES = {
    # 'FiScrape.pipelines.FiScrapePipeline': 100,
    'FiScrape.pipelines.DuplicatesPipeline': 200,
    'FiScrape.pipelines.SaveArticlesPipeline': 300,
+   # 'FiScrape.pipelines.SentimentPipeline': 400,
 }
 
 CONNECTION_STRING = 'sqlite:///FiScrape.db'
