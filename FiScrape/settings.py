@@ -65,6 +65,7 @@ ROBOTSTXT_OBEY = False
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
+   # 'FiScrape.pipelines.TestSpiderPipeline': 90,
    # 'FiScrape.pipelines.FiScrapePipeline': 100,
    'FiScrape.pipelines.DuplicatesPipeline': 200,
    'FiScrape.pipelines.SaveArticlesPipeline': 300,

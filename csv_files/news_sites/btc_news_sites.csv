@@ -1,0 +1,38 @@
+﻿Source,URL,JS
+FT,https://www.ft.com/search?q=Bitcoin&sort=date,0
+WSJ,https://www.wsj.com/search?query=Bitcoin&mod=searchresults_viewallresults,1
+CNBC,https://www.cnbc.com/search/?query=Bitcoin&qsearchterm=Bitcoin,1
+Bloomberg,https://www.bloomberg.com/search?query=Bitcoin,1
+Reuters,https://www.reuters.com/site-search/?query=Bitcoin,1
+Forbes,https://www.forbes.com/search/?sort=recent&q=bitcoin&sh=662d6f42279f,1
+ZeroHedge,https://www.zerohedge.com/search-content?qTitleBody=Bitcoin&page=0,1
+Seeking Alpha News,https://seekingalpha.com/symbol/BTC-USD/news,1
+Seeking Alpha Analysis,https://seekingalpha.com/symbol/BTC-USD/analysis,1
+Business Insider,https://markets.businessinsider.com/currencies/btc-usd,0
+Yahoo Finance,https://finance.yahoo.com/quote/BTC-USD?p=BTC-USD&.tsrc=fin-srch,0
+Kitco,https://www.kitco.com/search/?q=bitcoin,1
+Financial News,https://www.fnlondon.com/search/bitcoin,0
+Fast Company,https://www.fastcompany.com/search?searchkey=bitcoin,1
+BBC,https://www.bbc.co.uk/search?q=Bitcoin,0
+CNN,https://edition.cnn.com/search?q=Bitcoin&size=10&sort=newest,1
+Fox,https://www.foxnews.com/search-results/search?q=Bitcoin,1
+Independent,https://www.independent.co.uk/topic/bitcoin,0
+The Times,https://www.thetimes.co.uk/search?filter=all&q=Bitcoin&source=search-page,0
+The Guardian,https://www.theguardian.com/technology/bitcoin,0
+Vice,https://www.vice.com/en/topic/bitcoin,0
+The Economic Times,https://economictimes.indiatimes.com/news/bitcoin,0
+NDTV,https://www.ndtv.com/search?searchtext=Bitcoin,0
+Moneycontrol,https://www.moneycontrol.com/news/tags/bitcoin.html,0
+Mint,https://www.livemint.com/Search/Link/Keyword/Bitcoin,0
+Euronews,https://www.euronews.com/search?query=Bitcoin,0
+India Today,https://www.indiatoday.in/topic/Bitcoin,0
+News.com.au,https://www.news.com.au/search-results?q=bitcoin,0
+Quartz,https://qz.com/search/bitcoin/,0
+Business Standard,https://www.business-standard.com/search?q=Bitcoin,1
+News18,https://www.news18.com/topics/bitcoin/,0
+CoinDesk,https://www.coindesk.com/markets/,0
+Cointelegraph,https://cointelegraph.com/tags/bitcoin,1
+Bitcoin.com,https://news.bitcoin.com/?s=Bitcoin,1
+Bitcoin Magazine,https://bitcoinmagazine.com/articles,0
+The Daily Hodl,https://dailyhodl.com/bitcoin-news/,0
+Bitboy Crypto,https://bitboycrypto.com/?s=Bitcoin,0

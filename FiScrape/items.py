@@ -50,10 +50,11 @@ def clean_text(text):
     text = text.replace('. .', '.').strip()
     text = text.replace(':', ': ').replace(':  ', ': ').replace(' ;', ';')
     text = text.replace('...', '... ').replace(' .', '... ').strip()
-    text = text.replace('“ ', '“').replace(' ”','”').replace(" ’", "’").replace(" ’", "’")
+    text = text.replace('“ ', '"').replace(' ”','"').replace(" ’", "'").replace(" ’", "'")
     text = text.strip().replace("  ", " ").replace('  ', ' ').replace('  ', ' ')
     text = text.replace(' ... ..', '...').replace('......', '...').replace('..... ..', '...')
     text = text.replace('......', '...').replace('....', '...')
+    text = text.replace("‘", "'").replace("’", "'").replace('“', '"').replace('”', '"')
     text = text.replace('  ', ' ')
     return text
 

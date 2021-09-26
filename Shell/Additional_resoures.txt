@@ -1,0 +1,62 @@
+https://towardsdatascience.com/a-minimalist-end-to-end-scrapy-tutorial-part-i-11e350bcdec0
+
+scrapy shell http://quotes.toscrape.com/
+response.xpath("//div[@class='quote']").get()
+quotes = response.xpath("//div[@class='quote']")
+quotes[0].css(".text::text").getall()
+quotes[0].css(".author::text").getall()
+Crtl-D to exit shell
+Ctrl-L (clear output)
+
+scrapy crawl quotes
+scrapy crawl quotes -o quotes.json
+
+# The 'next' button:
+<li class="next">
+                <a href="/page/2/">Next <span aria-hidden="true">→</span></a>
+            </li>
+
+scrapy shell http://quotes.toscrape.com/
+response.css('li.next a::attr(href)').get()
+
+# Individul authors:
+scrapy shell http://quotes.toscrape.com/
+response.css('.author + a::attr(href)').get()
+
+#Access DB:
+sqlite3 scrapy_quotes.db
+.tables
+select * from quote limit 3;
+.quit
+
+https://www.zyte.com/pricing/
+
+
+
+scrapy crawl ft
+scrapy crawl ft -o output.csv -t csv
+
+#Access DB:
+sqlite3 FiScrape.db
+.tables
+.schema article
+.schema sentiment
+select * from article limit 3;
+.quit
+
+BEGIN;
+DROP TABLE sentiment;
+DROP TABLE temp_sent;
+COMMIT;
+
+BEGIN;
+SET NOCOUNT ON
+CREATE TEMP TABLE temp_sent AS SELECT published_date, id FROM article WHERE article.source_id = (SELECT rowid FROM Source WHERE name = 'ft');
+.schema temp_sent
+CREATE TEMP TABLE temp_sent2 AS SELECT temp_sent.id, published_date, subjectivity, polarity FROM temp_sent INNER JOIN snip_blob ON snip_blob.article_id = temp_sent.id;
+.schema temp_sent2
+CREATE TEMP TABLE Sentiment AS SELECT temp_sent2.id, published_date, subjectivity, polarity, compound, negative, neutral, positive FROM temp_sent2 INNER JOIN snip_vader ON snip_vader.article_id = temp_sent2.id;
+.schema sentiment
+SELECT * FROM sentiment;
+COMMIT;
+.q

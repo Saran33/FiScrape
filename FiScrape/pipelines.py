@@ -18,6 +18,11 @@ import logging
 #     def process_item(self, item, spider):
 #         return item
 
+# class TestSpiderPipeline:
+#     def process_item(self, item, spider):
+#         return item
+
+
 class SaveArticlesPipeline(object):
     def __init__(self):
         """
