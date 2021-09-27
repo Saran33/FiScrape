@@ -68,6 +68,17 @@ def convert_date(text):
         dt = parser.parse(text)
     return dt
 
+def convert_bi_dt(text):
+    """
+    convert string 'Sun Sep 26 2021 16:10:49 GMT+0000 (Coordinated Universal Time)' to Python date
+    """
+    text = text.replace('(Coordinated Universal Time)', '').strip()
+    try:
+        dt = datetime.strptime(text,"%a %b %d %Y %H:%M:%S GMT%z")
+    except:
+        dt = parser.parse(text)
+    return dt
+
 def convert_ft_dt(text):
     """
     convert string '1932-03-17T04:00:00+0000' to Python date
@@ -161,6 +172,52 @@ class FT_ArticleItem(Item):
     #     # TakeFirst return the first value not the whole list
     #     output_processor=TakeFirst()
     #     )
+    tags = Field()
+
+class InsiderArticleItem(Item):
+    published_date = Field(
+        input_processor=MapCompose(convert_bi_dt),
+        # TakeFirst return the first value not the whole list
+        output_processor=TakeFirst()
+        )
+    headline = Field(
+        input_processor=MapCompose(extract_headline),
+        # TakeFirst return the first value not the whole list
+        output_processor=Join()
+        )
+    # article_content = Field(
+    #     input_processor=MapCompose(remove_articles),
+    #     # TakeFirst return the first value not the whole list
+    #     output_processor=TakeFirst()
+    #     )
+    # standfirst = Field(
+    #     input_processor=MapCompose(extract_standfirst),
+    #     output_processor=Join()
+    #     )
+    standfirst = Field(
+        # Processed in pipeline due to limitations of Scrapy processors
+        )
+    article_link = Field(
+        input_processor=MapCompose(add_domain),
+        output_processor=TakeFirst()
+        )
+    author_names = Field(
+        #input_processor=MapCompose(str.strip),
+        #input_processor=Compose(str.strip),
+        #output_processor=TakeFirst()
+        )
+    author_bio = Field(
+        input_processor=MapCompose(strip_ft_bio),
+        output_processor=TakeFirst()
+        )
+    author_twitter = Field(
+        input_processor=MapCompose(str.strip),
+        output_processor=TakeFirst()
+        )
+    author_email = Field(
+        input_processor=MapCompose(remove_mail_to),
+        output_processor=TakeFirst()
+        )
     tags = Field()
 
 # class ArticleItem(Item):
