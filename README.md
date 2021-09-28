@@ -1,7 +1,7 @@
 # FiScrape
 
 ### Financial news scraping and processing for machine learning. 
-`FiScrape` is a package for scraping financial news for trading signals based on natural langage processing and sentiment analysis. It leverages `scrapy`.
+`FiScrape` is a package for scraping financial news and applying natural langage processing for sentiment analysis. It leverages `scrapy`.
 
 A search term can be queried across numerous online news sources. The resulting scraped headlines and bylines (and optionally the full text), along with metadata, will be timestamped and stored for each publication.
 
