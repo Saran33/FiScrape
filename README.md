@@ -41,7 +41,7 @@ e.g. ft is the spider name for the Financial Times:
 scrapy crawl ft
 ```
 You will be prompted to enter a search term. e.g. ```Bitcoin```
-You will be prompted to enter the oldest date from which to scrape. e.g ```zsh 2021-01-15```
+You will be prompted to enter the oldest date from which to scrape. e.g ```2021-01-15```
 You can also enter ```t``` for today, ```yd``` for yesterday, ```w``` for the past week, or ```y``` for the start of the current year.
 For the matching articles returned from the query, each headline, standfirst (referring to the snippet on the site's search page), summary, image caption, content body, footnote, author name, author position, author bio, author email, author twitter, are returned to a database.
 The default setting is to create a local SQLite DB file.
