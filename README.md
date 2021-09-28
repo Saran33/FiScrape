@@ -24,8 +24,8 @@ Perform this test step in order to inspect a list of URLs, to see if they render
 Save a csv file with a list of URLs. The column should be called 'URL' or 'url.'
 
 Open a shell in the top level FiScrape dir. Run the following command and it will prompt you for the url path.
-Enter ```zsh d``` to read the default CSV file. The default CSV file can be changed in the "FiScrape/spiders/test_scr.py" file.
-Enter ```zsh t``` to read the default test CSV file. The test CSV file can be changed in the "FiScrape/spiders/test_scr.py" file.
+Enter ```d``` to read the default CSV file. The default CSV file can be changed in the "FiScrape/spiders/test_scr.py" file.
+Enter ```t``` to read the default test CSV file. The test CSV file can be changed in the "FiScrape/spiders/test_scr.py" file.
 ```zsh
 scrapy crawl test
 ```
@@ -40,9 +40,9 @@ e.g. ft is the spider name for the Financial Times:
 ```zsh
 scrapy crawl ft
 ```
-You will be prompted to enter a search term. e.g. ```zsh Bitcoin```
+You will be prompted to enter a search term. e.g. ```Bitcoin```
 You will be prompted to enter the oldest date from which to scrape. e.g ```zsh 2021-01-15```
-You can also enter ```zsh t``` for today, ```zsh yd``` for yesterday, ```zsh w``` for the past week, or ```zsh y``` for the start of the current year.
+You can also enter ```t``` for today, ```yd``` for yesterday, ```w``` for the past week, or ```y``` for the start of the current year.
 For the matching articles returned from the query, each headline, standfirst (referring to the snippet on the site's search page), summary, image caption, content body, footnote, author name, author position, author bio, author email, author twitter, are returned to a database.
 The default setting is to create a local SQLite DB file.
 Alternatively, to save the scraped data to a CSV as well as the DB, run:
