@@ -38,7 +38,7 @@ scrapy crawl test --nolog
 Open a shell in the top level FiScrape dir. Enter the following command. 
 e.g. ft is the spider name for the Financial Times:
 ```zsh
-scrapy crawl ft
+scrapy crawl ft 
 ```
 You will be prompted to enter a search term. e.g. ```Bitcoin```
 You will be prompted to enter the oldest date from which to scrape. e.g ```2021-01-15```
@@ -68,7 +68,7 @@ In the `NLP_Trading_Example.ipynb` notebook, there is an example of how to use e
 
 The example aggregates the data into hourly candles, for the purposes of illustration. That could be useful for generating lagged or resampled sentiment features, although that may not be necessay if using a model such as a LSTM neural network.
 
-The notebook includes some trend indicators such as a Kalman filter, and volatility features such as Bollinger bands and a Yang-Zhang estimator. Numerous Python libraries need to be pip installed to run this file. Installing [Github-PWE_Analysis](https://github.com/Saran33/pwe_analysis/) should satisfy the dependencies. You will also need to install the C++ [TA-Lib] (https://github.com/mrjbq7/ta-lib)
+The notebook includes some trend indicators such as a Kalman filter, and volatility features such as Bollinger bands and a Yang-Zhang estimator. Numerous Python libraries need to be pip installed to run this file. Installing [Github-PWE_Analysis](https://github.com/Saran33/pwe_analysis/) should satisfy the dependencies. You will also need to install the C++ [TA-Lib](https://github.com/mrjbq7/ta-lib)
 
 The data is then passed to a preprocessing pipeline. The categorical featues are converted to one-hot encodings and the rest of the features are scaled.
 
