@@ -11,8 +11,12 @@ from sqlalchemy.orm import sessionmaker
 from scrapy.exceptions import DropItem
 from FiScrape.models import Article, Tag, db_connect, create_table, Topic, Source, Author, SnipBlob, Blob, SnipVader, Vader #  create_output_table
 from FiScrape.spiders.FiSpider import query
-from FiScrape.items import clean_text, extract_standfirst
+from FiScrape.items import clean_text, extract_standfirst, FT_ArticleItem, FT_AuthorItem, TestItem
 import logging
+# pip install -U textblob
+from textblob import TextBlob
+# pip install vaderSentiment
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 # class FiScrapePipeline:
 #     def process_item(self, item, spider):
@@ -24,7 +28,7 @@ import logging
 
 
 class SaveArticlesPipeline(object):
-    def __init__(self):
+    def __init__(self, stats):
         """
         Initializes database connection and sessionmaker
         Creates tables
@@ -32,6 +36,12 @@ class SaveArticlesPipeline(object):
         engine = db_connect()
         create_table(engine)
         self.Session = sessionmaker(bind=engine)
+        self.stats = stats
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(crawler.stats)
+    
 
 # class SaveArticlesPipeline(object):
 # #  To create a seperate table for each source
@@ -48,6 +58,21 @@ class SaveArticlesPipeline(object):
 #         create_output_table(engine, spider_name)
 
     def process_item(self, item, spider):
+        self.stats.inc_value('typecount/%s' % type(item).__name__)
+        # spider.crawler.stats.inc_value('scraped_items')
+        self.stats.inc_value('scraped_items')
+
+        if isinstance(item, FT_AuthorItem):
+            return self.process_author(item, spider)
+        if isinstance(item, FT_ArticleItem):
+            return self.process_article(item, spider)
+        if isinstance(item, TestItem):
+            return item
+
+    def process_author(self, item, spider):
+        yield item
+
+    def process_article(self, item, spider):
         """Save articles in the database
         This method is called for every item pipeline component
         """
@@ -72,8 +97,16 @@ class SaveArticlesPipeline(object):
         sf = clean_text(sf)
         article.standfirst = sf
         #article.standfirst = item["standfirst"]
+
+        if "article_summary" in item:
+            article.summary = item["article_summary"]
+        if "image_caption" in item:
+            article.image_caption = item["image_caption"]
+        if "article_content" in item:
+            article.content = item["article_content"]
+        if "article_footnote" in item:
+            article.footnote = item["article_footnote"]
         article.article_link = item["article_link"]
-        #article.article_content = item["article_content"]
 
         topic = Topic(name=query.capitalize())
         #topic.name = query.capitalize()
@@ -92,22 +125,47 @@ class SaveArticlesPipeline(object):
         else:
             article.source = source
 
+        # #check whether the current article has authors or not
+        # if "author_names" in item:
+        #     for author_name in item["author_names"]:
+        #         author = Author(name=author_name)
+        #         if "author_bio" in item:
+        #             author.bio = item["author_bio"]
+        #         if "author_twitter" in item:
+        #             author.twitter = item["author_twitter"]
+        #         if "author_email" in item:
+        #             author.email = item["author_email"]
+        #         if "author_bias" in item:
+        #             author.bias = item["author_bias"]
+        #         if "author_birthday" in item:
+        #             author.birthday = item["author_birthday"]
+        #         if "author_bornlocation" in item:
+        #             author.bornlocation = item["author_bornlocation"]
+        #         # check whether the author exists
+        #         exist_author = session.query(Author).filter_by(name = author.name).first()
+        #         if exist_author is not None:  # the current author exists
+        #             author = exist_author
+        #         article.authors.append(author)
+
         #check whether the current article has authors or not
-        if "author_names" in item:
-            for author_name in item["author_names"]:
-                author = Author(name=author_name)
-                if "author_bio" in item:
-                    author.bio = item["author_bio"]
-                if "author_twitter" in item:
-                    author.twitter = item["author_twitter"]
-                if "author_email" in item:
-                    author.email = item["author_email"]
-                if "author_bias" in item:
-                    author.bias = item["author_bias"]
-                if "author_birthday" in item:
-                    author.birthday = item["author_birthday"]
-                if "author_bornlocation" in item:
-                    author.bornlocation = item["author_bornlocation"]
+        if "authors" in item:
+            for auth in item["authors"]:
+                author = Author(name=auth["author_name"])
+                author.name = auth['author_name']
+                if 'author_position' in auth:
+                    author.position = auth['author_position']
+                if "author_bio" in auth:
+                    author.bio = auth["author_bio"]
+                if "author_twitter" in auth:
+                    author.twitter = auth["author_twitter"]
+                if "author_email" in auth:
+                    author.email = auth["author_email"]
+                if "author_bias" in auth:
+                    author.bias = auth["author_bias"]
+                if "author_birthday" in auth:
+                    author.birthday = auth["author_birthday"]
+                if "author_bornlocation" in auth:
+                    author.bornlocation = auth["author_bornlocation"]
                 # check whether the author exists
                 exist_author = session.query(Author).filter_by(name = author.name).first()
                 if exist_author is not None:  # the current author exists
@@ -191,11 +249,40 @@ class SaveArticlesPipeline(object):
         sentiment =sia.polarity_scores(text)
         return sentiment
 
+# class DuplicatesPipeline(object):
+
+#     def __init__(self):
+#         """
+#         Initializes database connection and sessionmaker.
+#         Creates tables.
+#         """
+#         engine = db_connect()
+#         create_table(engine)
+#         self.Session = sessionmaker(bind=engine)
+#         logging.info("****DuplicatesPipeline: database connected****")
+
+#     def process_item(self, item, spider):
+#         session = self.Session()
+#         exist_article = session.query(Article).filter_by(article_link = item["article_link"]).first()
+#         session.close()
+#         if exist_article is not None:  # the current article exists
+#             topic_name = query.capitalize()
+#             # if topic_name in exist_article.topics:
+#             exist_topic = session.query(Topic).filter_by(name = topic_name).first()
+#             if exist_topic is not None:  # the current topic exists
+#                 raise DropItem("Duplicate item found: %s" % item["headline"])
+#             else:
+#                 article = exist_article
+#                 article.topics.append(topic_name)
+#                 raise DropItem("Duplicate item found: %s" % item["headline"])
+#         else:
+#             return item
+
 class DuplicatesPipeline(object):
 
     def __init__(self):
         """
-        Initializes database connection and sessionmaker.
+        Initializes database connection and sesssionmaker.
         Creates tables.
         """
         engine = db_connect()
@@ -204,6 +291,14 @@ class DuplicatesPipeline(object):
         logging.info("****DuplicatesPipeline: database connected****")
 
     def process_item(self, item, spider):
+        if isinstance(item, FT_AuthorItem):
+            return self.process_author(item, spider)
+        if isinstance(item, FT_ArticleItem):
+            return self.process_article(item, spider)
+        if isinstance(item, TestItem):
+            return item
+    
+    def process_article(self, item, spider):
         session = self.Session()
         exist_article = session.query(Article).filter_by(article_link = item["article_link"]).first()
         session.close()
@@ -219,6 +314,18 @@ class DuplicatesPipeline(object):
                 raise DropItem("Duplicate item found: %s" % item["headline"])
         else:
             return item
+
+    def process_author(self, item, spider):
+        # pass
+        return item
+        # if "author_name" in item:
+        #     exist_author = session.query(Author).filter_by(name = item["author_name"]).first() # , email=item["author_email"]
+        #     session.close()
+        #     if exist_author is not None:  # the current article exists
+        #             raise DropItem("Duplicate item found: %s" % item["headline"])
+        #     else:
+        #         return item
+
 
 # class DuplicatesPipeline(object):
 
@@ -241,18 +348,7 @@ class DuplicatesPipeline(object):
 #         else:
 #             return item
 
-import pandas as pd
-import numpy as np
-# pip install -U textblob
-from textblob import TextBlob
-import re
-# pip install vaderSentiment
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-# # pip install -U scikit-learn
-# from sklearn.model_selection import train_test_split
-# from sklearn.metrics import accuracy_score, classification_report
-# from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-# from sklearn.preprocessing import RobustScaler
+
 
 # class SentimentPipeline(object):
 

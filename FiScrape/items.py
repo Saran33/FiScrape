@@ -7,7 +7,8 @@
 
 from scrapy.item import Item, Field
 #from scrapy.loader.processors import MapCompose, TakeFirst
-from itemloaders.processors import MapCompose, TakeFirst, Compose, Join
+from itemloaders.processors import MapCompose, TakeFirst, Compose, Join, Identity
+from itemloaders import ItemLoader
 from datetime import datetime
 from dateutil import parser
 # dtt = parser.parse(dt)
@@ -34,7 +35,7 @@ def extract_headline(text):
 
 def extract_standfirst(text):
     #text =  "".join(text)
-    text = text.replace('\n\t\t\t\t\t\t\n\t\t\t\t\t\t', ' ').replace('  ', ' ').replace('   ', ' ').replace('...“', '').replace('”...', '.').replace('...', '')
+    text = text.replace('\n\t\t\t\t\t\t\n\t\t\t\t\t\t', ' ').replace('...“', '').replace('”...', '.').replace('...', '').replace('.', '. ').replace(',', ', ').replace('  ', ' ').replace('   ', ' ')
     #text = text.strip(u'\u201c'u'\u201d')
     return text
 
@@ -109,6 +110,11 @@ def parse_location(text):
     # this simply remove "in ", you can further parse city, state, country, etc.
     return text[3:]
 
+class TestItem(Item):
+    Field(
+        input_processor=Identity(),
+        output_processor=Identity()
+        )
 
 class FT_ArticleItem(Item):
     published_date = Field(
@@ -121,11 +127,6 @@ class FT_ArticleItem(Item):
         # TakeFirst return the first value not the whole list
         output_processor=Join()
         )
-    # article_content = Field(
-    #     input_processor=MapCompose(remove_articles),
-    #     # TakeFirst return the first value not the whole list
-    #     output_processor=TakeFirst()
-    #     )
     # standfirst = Field(
     #     input_processor=MapCompose(extract_standfirst),
     #     output_processor=Join()
@@ -133,23 +134,50 @@ class FT_ArticleItem(Item):
     standfirst = Field(
         # Processed in pipeline due to limitations of Scrapy processors
         )
-    # category = Field(
-    #     input_processor=MapCompose(remove_space),
-    #     # TakeFirst return the first value not the whole list
-    #     output_processor=TakeFirst()
-    #     )
+    article_summary = Field(
+        input_processor=MapCompose(extract_headline),
+        # TakeFirst return the first value not the whole list
+        output_processor=Join()
+        )
+    image_caption = Field(
+        input_processor=MapCompose(extract_standfirst, str.strip),
+        # TakeFirst return the first value not the whole list
+        output_processor=Join()
+        )
+    article_content = Field(
+        input_processor=MapCompose(remove_articles),
+        # TakeFirst return the first value not the whole list
+        output_processor=Join()
+        )
+    article_footnote = Field(
+        input_processor=MapCompose(str.strip),
+        # TakeFirst return the first value not the whole list
+        output_processor=Join()
+        )
     article_link = Field(
         input_processor=MapCompose(add_domain),
         output_processor=TakeFirst()
         )
-    author_names = Field(
-        #input_processor=MapCompose(str.strip),
-        #input_processor=Compose(str.strip),
-        #output_processor=TakeFirst()
+    # authors = Field(
+    #     )
+    authors = Field(
+        input_processor=Identity()
+        )
+    tags = Field()
+# class ProfileField(scrapy.item.Field):
+
+class FT_AuthorItem(Item):
+    author_name = Field(
+        input_processor=MapCompose(str.strip),
+        output_processor=TakeFirst()
+        )
+    author_position = Field(
+        input_processor=MapCompose(str.strip),
+        output_processor=Join()
         )
     author_bio = Field(
         input_processor=MapCompose(strip_ft_bio),
-        output_processor=TakeFirst()
+        output_processor=Join()
         )
     author_twitter = Field(
         input_processor=MapCompose(str.strip),
@@ -159,20 +187,19 @@ class FT_ArticleItem(Item):
         input_processor=MapCompose(remove_mail_to),
         output_processor=TakeFirst()
         )
-    # author_birthday = Field(
-    #     input_processor=MapCompose(convert_date),
-    #     output_processor=TakeFirst()
-    # )
-    # author_bornlocation = Field(
-    #     input_processor=MapCompose(parse_location),
-    #     output_processor=TakeFirst()
-    # )
-    # tags = Field(
-    #     input_processor=MapCompose(remove_space),
-    #     # TakeFirst return the first value not the whole list
-    #     output_processor=TakeFirst()
-    #     )
-    tags = Field()
+    author_birthday = Field(
+        input_processor=MapCompose(convert_date),
+        output_processor=TakeFirst()
+    )
+    author_bornlocation = Field(
+        input_processor=MapCompose(parse_location),
+        output_processor=TakeFirst()
+    )
+
+class AuthorItemLoader(ItemLoader):
+    default_input_processor=MapCompose(str.strip)
+    default_output_processor=TakeFirst()
+    default_item_class=FT_AuthorItem
 
 class InsiderArticleItem(Item):
     published_date = Field(

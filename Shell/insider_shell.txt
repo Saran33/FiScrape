@@ -1,0 +1,71 @@
+
+Check for JS: in cchrome dev > Network mode, then from dropdown, click "Slow 3G."
+Reset it if the page is rendering JS. (or just close dev to rset it)
+F1 for settings > Debugger > disable JS.
+Reload page with dev open.
+
+scrapy shell "https://www.businessinsider.com/s?q=bitcoin"
+
+
+response.css('head').get()
+snippets = response.xpath('//*[@id="l-content"]/section[@class="river-item featured-post"]')
+snippets[0]
+published_date = snippets[0].xpath('//*[@id="l-content"]/section[@class="river-item featured-post"]/div/span//text()')
+published_date = snippets[0].xpath('//*[@class="river-item featured-post"]/div/span[@class="tout-timestamp headline-regular js-date-format js-rendered"]//text()')
+published_date = snippets[0].css('.div.span::text')
+published_date = snippets[0].css('span ::text')
+snippets[0].css('span::text').get()
+snippets[0].css('div.tout-tag.d-lg-flex span::text').get()
+
+headline = snippets[0].xpath('//*[@id="l-content"]/section[1]/section/div[2]/h2/a/text()')
+snippets[0].xpath('//section/div[2]/h2/a/text()').get()
+snippets[0].xpath('//section/div[@class="tout-text-wrapper default-tout"]/h2/a/text()').get()
+
+standfirst = response.xpath('//*[@id="l-content"]/section[8]/section/div[2]/div/text()')
+response.xpath('//*[@id="l-content"]/section[8]/section/div[2]/div/text()').get()
+snippets[0].xpath('.//section/div[@class="tout-text-wrapper default-tout"]/div[@class="tout-copy river body-regular"]/text()').get()
+
+tags = snippets[0].xpath('//*[@id="l-content"]/section[1]/div/a')
+snippets[0].xpath('//div[@class="tout-tag d-lg-flex"]/a/text()').get()
+
+link = snippets[0].xpath('//*[@id="l-content"]/section[1]/section/div[2]/h2/a')
+snippets[0].xpath('//section/div[@class="tout-text-wrapper default-tout"]/h2/a/@href').get()
+
+last_date = response.xpath('//*[@id="l-content"]/section[@class="river-item featured-post"]/div/span//text()')[-1].get()
+
+next_page = response.xpath('//*[@id="l-content"]/a/@href').get()
+
+scrapy shell 'https://www.businessinsider.com/netflix-documentary-crypto-gerald-cotten-death-2021-9'
+
+summary = response.xpath('//*[@id="piano-inline-content-wrapper"]/div/div/ul/text()').get()
+response.css('#piano-inline-content-wrapper > div > div > ul ::text').getall()
+response.css('#piano-inline-content-wrapper > div > div > ul ::text').getall()
+response.xpath('normalize-space(//*[@id="piano-inline-content-wrapper"]/div/div/ul/text())').getall()
+response.xpath('//*[@id="piano-inline-content-wrapper"]/div/div/ul/text()/normalize-space()').getall()
+response.xpath('//*ul[@class="summary-list summary-list-variant"]/text()[normalize-space()]').get()
+response.css('#piano-inline-content-wrapper > div > div > ul').xpath('normalize-space(text())').extract()
+response.css('#piano-inline-content-wrapper > div > div > ul ::text').getall()
+
+authors = response.xpath('//*[@class="byline-wrapper col-12"]/div/div/div/div/div[1]/span/a/text()').get()
+response.xpath('//*[@class="byline-author headline-bold"]/span/a/text()').get()
+
+author_urls = response.xpath('//*[@class="byline-link byline-author-name"]/@href').getall()
+
+'//*[@id="l-main-content"]/section/section/section[2]/div/div/div/div/div[1]/span/a'
+
+article_content = response.xpath('//*[@id="piano-inline-content-wrapper"]/div/div/p/text()').getall()
+response.css('#piano-inline-content-wrapper > div > div > p ::text').getall()
+
+article_footnote = response.xpath('//*[@id="l-content"]/section/div/article/div[1]/section/section/div/p[@class="body-italic"]/text()').get()
+article_footnote = response.xpath('//*[@class="category-tagline body-italic"]/div/p[@class="body-italic"]/text()').get()
+
+scrapy shell 'https://www.businessinsider.com/author/francis-agustin'
+author = response.xpath('//*[@id="l-content"]/section[1]').get()
+response.xpath('//*[@id="l-content"]/section[1]').get()
+
+author_bio = response.xpath('//*[@id="l-content"]/section[1]/div/div[2]/p/text()').getall()
+author_bio = response.xpath('.//*[@id="l-content"]/section[1]/div/div[2]/p/text()').getall()
+ 
+ author_email = response.xpath('.//*[@class="author-contact-icon-link share-link email"]/@href').get()
+
+ author_twitter = response.xpath('.//*[@class="author-contact-icon-link share-link twitter"]/@href').get()
