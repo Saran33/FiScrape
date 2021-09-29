@@ -150,8 +150,8 @@ class SaveArticlesPipeline(object):
         #check whether the current article has authors or not
         if "authors" in item:
             for auth in item["authors"]:
-                author = Author(name=auth["author_name"].replace(' ', '_'))
-                author.name = auth['author_name']
+                author = Author(name=auth["author_name"])
+                # author.name = auth['author_name']
                 if 'author_position' in auth:
                     author.position = auth['author_position']
                 if "author_bio" in auth:
