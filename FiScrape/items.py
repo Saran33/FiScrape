@@ -14,6 +14,7 @@ from dateutil import parser
 from datetime import date, datetime,timedelta
 from pytz import timezone
 from dateutil import parser
+from unicodedata import normalize
 
 def strp_dt(text):
     """
@@ -28,7 +29,8 @@ def strp_dt(text):
 
 def remove_articles(text):
     # strip the unicode articles
-    text = text.strip(u'\u201c'u'\u201d')
+    #text = normalize("NFKD", text.strip(u'\u201c'u'\u201d'))
+    text = normalize("NFKD",' '.join(map(str, text)).replace('  ', ' ').strip())
     return text
 
 def remove_space(text):
@@ -152,7 +154,7 @@ class FT_ArticleItem(Item):
         output_processor=Join()
         )
     image_caption = Field(
-        input_processor=MapCompose(extract_standfirst, str.strip),
+        input_processor=MapCompose(remove_articles),
         # TakeFirst return the first value not the whole list
         output_processor=Join()
         )
@@ -162,7 +164,7 @@ class FT_ArticleItem(Item):
         output_processor=Join()
         )
     article_footnote = Field(
-        input_processor=MapCompose(str.strip),
+        input_processor=MapCompose(remove_articles),
         # TakeFirst return the first value not the whole list
         output_processor=Join()
         )

@@ -7,6 +7,7 @@ from pytz import timezone
 from dateutil import parser
 from scrapy.selector import Selector
 from FiScrape.search import query, start_date
+from unicodedata import normalize
 
 # from ln_meta import ft_user,ft_pass,wsj_user,wsj_pass
 # class LoginSpider(scrapy.Spider):
@@ -78,29 +79,29 @@ class FtSpider(scrapy.Spider):
         loader = ItemLoader(item=article_item, response=response)
         article_summary = response.xpath('.//*[@class="o-topper__standfirst"]/text()')
         if article_summary:
-            loader.add_xpath('article_summary', article_summary)
-        image_caption = response.xpath('.//*[@id="site-content"]/div[1]/figure/figcaption')
+            loader.add_xpath('article_summary', article_summary.get())
+        image_caption = response.xpath('//*[@id="site-content"]/div[1]/figure/figcaption/text()')
         if image_caption:
-            loader.add_xpath('image_caption', image_caption)
-        article_content = response.xpath('.//*[@class="article__content-body n-content-body js-article__content-body"]/p/text()')
+            loader.add_xpath('image_caption', image_caption.getall())
+        article_content = response.xpath('//*[contains(@class, "article__content-body n-content-body js-article__content-body")]//text()[not(ancestor::*[@class="n-content-layout__container"])]')
         if article_content:
-            loader.add_xpath('article_content', article_content)
+            loader.add_xpath('article_content', article_content.getall())
         article_footnote = response.xpath('.//*[@id="site-content"]/div[3]/div[3]/p[1]/em/text()')
         if article_footnote:
-            loader.add_xpath('article_footnote', article_footnote)
+            loader.add_xpath('article_footnote', article_footnote.get())
         article_footnote_2 = response.xpath('.//*[@id="site-content"]/div[3]/div[2]/p[last()-1]/em/text()')
         if article_footnote_2:
-            loader.add_xpath('article_footnote', article_footnote_2)
+            loader.add_xpath('article_footnote', article_footnote_2.get())
         article_item['authors'] = {}
         article_item['authors']['author'] = {}
         authors = response.css("a.n-content-tag--author")
         if authors:
             for author in authors:
                 article_item['authors']['author']['author_name'] = author.css("a.n-content-tag--author::text").get()
-                author_url = author.css("a.n-content-tag--author::attr(href)").extract()
-                author_url = response.urljoin(''.join(map(str, author_url)))
-                article_item['authors']['author']['author_url'] = author_url
-                yield response.follow(author_url, callback=self.parse_author, meta={'article_item': article_item})
+                bio_link = author.css("a.n-content-tag--author::attr(href)").extract()
+                bio_link = response.urljoin(''.join(map(str, bio_link)))
+                article_item['authors']['author']['bio_link'] = bio_link
+                yield response.follow(bio_link, callback=self.parse_author, meta={'article_item': article_item})
                 #yield from response.follow(author_url, callback=self.parse_author, cb_kwargs={'authors': article_item['authors']})
                 # meta={'article_item': article_item}
                 # 
@@ -113,7 +114,7 @@ class FtSpider(scrapy.Spider):
         # article_item['authors']['author']['author_name'] = author.xpath('//h1[@class="sub-header__page-title"]/text()').get().strip()
         article_item['authors']['author']['author_position'] = author.css("div.sub-header__strapline::text").get().strip()
         author_bio = author.css('.sub-header__description p ::text').getall()
-        author_bio = (' '.join(map(str, author_bio))).replace('  ', ' ').strip()
+        author_bio = normalize(' '.join(map(str, author_bio)).replace('  ', ' ').strip())
         article_item['authors']['author']['author_bio'] = author_bio
         article_item['authors']['author']['author_email'] = response.xpath("//a[@class='sub-header__content__link sub-header__content__link--email-address']/@href").get().replace("mailto:", '').strip()
         article_item['authors']['author']['author_twitter'] = response.xpath('.//a[@class="sub-header__content__link sub-header__content__link--twitter-handle"]/@href').get().strip()

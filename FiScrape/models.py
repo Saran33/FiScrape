@@ -111,6 +111,7 @@ class Author(Base):
     name = Column('name', String(50), unique=True, default=None)
     position = Column('position', String(150), default=None)
     bio = Column('bio', Text(), default=None)
+    bio_link = Column('bio_link', Text(), default=None)
     twitter = Column('twitter', String(36), default=None)
     email = Column('email', String(50), default=None)
     birthday = Column('birthday', DateTime, default=None)
