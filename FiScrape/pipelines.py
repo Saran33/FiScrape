@@ -10,8 +10,8 @@ from itemadapter import ItemAdapter
 from sqlalchemy.orm import sessionmaker
 from scrapy.exceptions import DropItem
 from FiScrape.models import Article, Tag, db_connect, create_table, Topic, Source, Author, SnipBlob, Blob, SnipVader, Vader #  create_output_table
-from FiScrape.spiders.FiSpider import query
-from FiScrape.items import clean_text, extract_standfirst, FT_ArticleItem, FT_AuthorItem, TestItem
+from FiScrape.search import query
+from FiScrape.items import clean_text, extract_standfirst, FT_ArticleItem, TestItem #FT_AuthorItem
 import logging
 # pip install -U textblob
 from textblob import TextBlob
@@ -62,15 +62,15 @@ class SaveArticlesPipeline(object):
         # spider.crawler.stats.inc_value('scraped_items')
         self.stats.inc_value('scraped_items')
 
-        if isinstance(item, FT_AuthorItem):
-            return self.process_author(item, spider)
+        # if isinstance(item, FT_AuthorItem):
+            # return self.process_author(item, spider)
         if isinstance(item, FT_ArticleItem):
             return self.process_article(item, spider)
         if isinstance(item, TestItem):
             return item
 
-    def process_author(self, item, spider):
-        yield item
+    # def process_author(self, item, spider):
+    #     yield item
 
     def process_article(self, item, spider):
         """Save articles in the database
@@ -291,8 +291,8 @@ class DuplicatesPipeline(object):
         logging.info("****DuplicatesPipeline: database connected****")
 
     def process_item(self, item, spider):
-        if isinstance(item, FT_AuthorItem):
-            return self.process_author(item, spider)
+        # if isinstance(item, FT_AuthorItem):
+        #     return self.process_author(item, spider)
         if isinstance(item, FT_ArticleItem):
             return self.process_article(item, spider)
         if isinstance(item, TestItem):
@@ -315,16 +315,10 @@ class DuplicatesPipeline(object):
         else:
             return item
 
-    def process_author(self, item, spider):
-        # pass
-        return item
-        # if "author_name" in item:
-        #     exist_author = session.query(Author).filter_by(name = item["author_name"]).first() # , email=item["author_email"]
-        #     session.close()
-        #     if exist_author is not None:  # the current article exists
-        #             raise DropItem("Duplicate item found: %s" % item["headline"])
-        #     else:
-        #         return item
+    # def process_author(self, item, spider):
+    #     # pass
+    #     return item
+
 
 
 # class DuplicatesPipeline(object):

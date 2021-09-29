@@ -57,6 +57,9 @@ article_page = response.follow(article_link)
 article_page = scrapy.Request(article_link)
 # or:
 scrapy shell 'https://www.ft.com/content/b9f6c876-22bb-498c-a425-78287455a3e1' --nolog
+# Multiple athors:
+scrapy shell 'https://www.ft.com/content/b26319f6-6cb7-4e0e-a0d9-bac71d9b8c34' --nolog
+
 head = response.css('head').get()
 response.css('body').get()
 body = response.css('body')
@@ -97,12 +100,32 @@ article = response.xpath("//article")
 
 <h1 class="o-topper__headline o-topper__headline--basic"><span class="article-classifier__gap">Finance industry warns against ‘unnecessarily restrictive’ crypto capital rules</span></h1>
 
-authors = body.css(".div.a.n-content-tag--author::text").getall()
+authors = response.css("a.n-content-tag--author")
+for author in authors:
+	author_name = author.css("a.n-content-tag--author::text").get()
+	print (author_name)
+	author_url = author.css("a.n-content-tag--author::attr(href)").extract()
+	author_url = response.urljoin(''.join(map(str, author_url)))
+	print (author_url)
 
-authors = response.css("a.n-content-tag--author::text").getall()
-authors = article.css("a.n-content-tag--author::text").getall()
+authors = response.xpath('//*[@id="site-content"]/div[3]/div[1]/div/p/a/text()').getall()
+authors = response.xpath('//*[@id="site-content"]/div[3]/div[1]/div/p/a[1]/text()').getall()
+authors = response.css("a.n-content-tag--author::text").get()
 
-author_urls = article.css("a.n-content-tag--author::attr(href)").getall()
+author_urls = response.css("a.n-content-tag--author::attr(href)").getall()
+author_urls = response.css("a.n-content-tag--author::attr(href)").get().extract()
+author_urls = response.css("a.n-content-tag--author::attr(href)").extract()
+for author_url in author_urls:
+	url_str = str(author_url)
+	url_str = ''.join(map(str, author_url))
+	print (type(author_url))
+	author_url = response.urljoin(url_str)
+	print (author_url)
+
+author_urls = response.css("a.n-content-tag--author::attr(href)").extract()
+for author_url in author_urls:
+	author_url = response.urljoin(str(author_url))
+	print (author_url)
 
 scrapy shell 'https://www.ft.com/laurence-fletcher/' --nolog
 author = response.xpath('//div[@class="sub-header sub-header--author"]')

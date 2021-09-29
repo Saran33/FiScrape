@@ -11,8 +11,20 @@ from itemloaders.processors import MapCompose, TakeFirst, Compose, Join, Identit
 from itemloaders import ItemLoader
 from datetime import datetime
 from dateutil import parser
-# dtt = parser.parse(dt)
-# print (dtt)
+from datetime import date, datetime,timedelta
+from pytz import timezone
+from dateutil import parser
+
+def strp_dt(text):
+    """
+    convert string '1932-03-17' to Python date, add utc timezone.
+    """
+    try:
+        dt = datetime.strptime(text, "%Y-%m-%d")
+    except:
+        dt = parser.parse(text)
+    dt = timezone.utc.localize(dt)
+    return dt
 
 def remove_articles(text):
     # strip the unicode articles
@@ -164,42 +176,42 @@ class FT_ArticleItem(Item):
         input_processor=Identity()
         )
     tags = Field()
-# class ProfileField(scrapy.item.Field):
+# # class ProfileField(scrapy.item.Field):
 
-class FT_AuthorItem(Item):
-    author_name = Field(
-        input_processor=MapCompose(str.strip),
-        output_processor=TakeFirst()
-        )
-    author_position = Field(
-        input_processor=MapCompose(str.strip),
-        output_processor=Join()
-        )
-    author_bio = Field(
-        input_processor=MapCompose(strip_ft_bio),
-        output_processor=Join()
-        )
-    author_twitter = Field(
-        input_processor=MapCompose(str.strip),
-        output_processor=TakeFirst()
-        )
-    author_email = Field(
-        input_processor=MapCompose(remove_mail_to),
-        output_processor=TakeFirst()
-        )
-    author_birthday = Field(
-        input_processor=MapCompose(convert_date),
-        output_processor=TakeFirst()
-    )
-    author_bornlocation = Field(
-        input_processor=MapCompose(parse_location),
-        output_processor=TakeFirst()
-    )
+# class FT_AuthorItem(Item):
+    # author_name = Field(
+    #     input_processor=MapCompose(str.strip),
+    #     output_processor=TakeFirst()
+    #     )
+    # author_position = Field(
+    #     input_processor=MapCompose(str.strip),
+    #     output_processor=Join()
+    #     )
+    # author_bio = Field(
+    #     input_processor=MapCompose(strip_ft_bio),
+    #     output_processor=Join()
+    #     )
+    # author_twitter = Field(
+    #     input_processor=MapCompose(str.strip),
+    #     output_processor=TakeFirst()
+    #     )
+    # author_email = Field(
+    #     input_processor=MapCompose(remove_mail_to),
+    #     output_processor=TakeFirst()
+    #     )
+    # author_birthday = Field(
+    #     input_processor=MapCompose(convert_date),
+    #     output_processor=TakeFirst()
+    # )
+    # author_bornlocation = Field(
+    #     input_processor=MapCompose(parse_location),
+    #     output_processor=TakeFirst()
+    # )
 
-class AuthorItemLoader(ItemLoader):
-    default_input_processor=MapCompose(str.strip)
-    default_output_processor=TakeFirst()
-    default_item_class=FT_AuthorItem
+# class AuthorItemLoader(ItemLoader):
+#     default_input_processor=MapCompose(str.strip)
+#     default_output_processor=TakeFirst()
+#     default_item_class=FT_AuthorItem
 
 class InsiderArticleItem(Item):
     published_date = Field(
