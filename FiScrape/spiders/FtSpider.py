@@ -93,31 +93,33 @@ class FtSpider(scrapy.Spider):
         if article_footnote_2:
             loader.add_value('article_footnote', article_footnote_2)
         article_item['authors'] = {}
-        article_item['authors']['author'] = {}
         authors = response.css("a.n-content-tag--author")
         if authors:
             for author in authors:
-                article_item['authors']['author']['author_name'] = author.css("a.n-content-tag--author::text").get()
+                auth = author.css("a.n-content-tag--author::text").get()
+                article_item['authors'][f'{auth}'] = {}
+                # article_item['authors']['author'] = dict.fromkeys(auth)
                 bio_link = author.css("a.n-content-tag--author::attr(href)").extract()
                 bio_link = response.urljoin(''.join(map(str, bio_link)))
-                article_item['authors']['author']['bio_link'] = bio_link
-                yield response.follow(bio_link, callback=self.parse_author, meta={'article_item': article_item})
+                article_item['authors'][f'{auth}']['bio_link'] = bio_link
+                yield response.follow(bio_link, callback=self.parse_author, meta={'article_item': article_item}, cb_kwargs={'auth': article_item['authors'][f'{auth}']})
                 #yield from response.follow(author_url, callback=self.parse_author, cb_kwargs={'authors': article_item['authors']})
                 # meta={'article_item': article_item}
                 # 
         else:
             yield loader.load_item()
 
-    def parse_author(self, response):
+    def parse_author(self, response, auth):
         article_item = response.meta['article_item']
+        auth = response.cb_kwargs['auth']
         author = response.xpath('//div[@class="sub-header sub-header--author"]')
         # article_item['authors']['author']['author_name'] = author.xpath('//h1[@class="sub-header__page-title"]/text()').get().strip()
-        article_item['authors']['author']['author_position'] = author.css("div.sub-header__strapline::text").get().strip()
+        article_item['authors'][f'{auth}']['author_position'] = author.css("div.sub-header__strapline::text").get().strip()
         author_bio = author.css('.sub-header__description p ::text').getall()
         author_bio = normalize("NFKD", ' '.join(map(str, author_bio)).replace('  ', ' ').strip())
-        article_item['authors']['author']['author_bio'] = author_bio
-        article_item['authors']['author']['author_email'] = response.xpath("//a[@class='sub-header__content__link sub-header__content__link--email-address']/@href").get().replace("mailto:", '').strip()
-        article_item['authors']['author']['author_twitter'] = response.xpath('.//a[@class="sub-header__content__link sub-header__content__link--twitter-handle"]/@href').get().strip()
+        article_item['authors'][f'{auth}']['author_bio'] = author_bio
+        article_item['authors'][f'{auth}']['author_email'] = response.xpath("//a[@class='sub-header__content__link sub-header__content__link--email-address']/@href").get().replace("mailto:", '').strip()
+        article_item['authors'][f'{auth}']['author_twitter'] = response.xpath('.//a[@class="sub-header__content__link sub-header__content__link--twitter-handle"]/@href').get().strip()
         yield article_item
 
 # class FT_Spider(scrapy.Spider):
