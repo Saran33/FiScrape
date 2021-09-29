@@ -76,11 +76,21 @@ class FtSpider(scrapy.Spider):
     def parse_article(self, response):
         article_item = response.meta['article_item']
         loader = ItemLoader(item=article_item, response=response)
-        loader.add_xpath('article_summary', './/*[@class="o-topper__standfirst"]/text()')
-        loader.add_xpath('image_caption', './/*[@class="n-content-image__caption"]/text()')
-        loader.add_xpath('article_content', './/*[@class="article__content-body n-content-body js-article__content-body"]/p/text()')
-        loader.add_xpath('article_footnote', './/*[@id="site-content"]/div[3]/div[3]/p[1]/em/text()')
-        loader.add_xpath('article_footnote', './/*[@id="site-content"]/div[3]/div[2]/p[last()-1]/em/text()')
+        article_summary = response.xpath('.//*[@class="o-topper__standfirst"]/text()')
+        if article_summary:
+            loader.add_xpath('article_summary', article_summary)
+        image_caption = response.xpath('.//*[@id="site-content"]/div[1]/figure/figcaption')
+        if image_caption:
+            loader.add_xpath('image_caption', image_caption)
+        article_content = response.xpath('.//*[@class="article__content-body n-content-body js-article__content-body"]/p/text()')
+        if article_content:
+            loader.add_xpath('article_content', article_content)
+        article_footnote = response.xpath('.//*[@id="site-content"]/div[3]/div[3]/p[1]/em/text()')
+        if article_footnote:
+            loader.add_xpath('article_footnote', article_footnote)
+        article_footnote_2 = response.xpath('.//*[@id="site-content"]/div[3]/div[2]/p[last()-1]/em/text()')
+        if article_footnote_2:
+            loader.add_xpath('article_footnote', article_footnote_2)
         article_item['authors'] = {}
         article_item['authors']['author'] = {}
         authors = response.css("a.n-content-tag--author")
@@ -99,13 +109,14 @@ class FtSpider(scrapy.Spider):
 
     def parse_author(self, response):
         article_item = response.meta['article_item']
-        article_item['authors']['author']['author_name'] = response.xpath('.//h1[@class="sub-header__page-title"]/text()')
-        article_item['authors']['author']['author_position'] = response.xpath('div.sub-header__strapline::text')
-        article_item['authors']['author']['author_bio'] = response.xpath('.//*[@class="sub-header__description"]/descendant-or-self::*/text()')
-        article_item['authors']['author']['author_email'] = response.xpath('.//a[@class="sub-header__content__link sub-header__content__link--email-address"]/@href')
-        article_item['authors']['author']['author_twitter'] = response.xpath('.//a[@class="sub-header__content__link sub-header__content__link--twitter-handle"]/@href')
-        article_item['authors']['author']['author_position'] = response.xpath('div.sub-header__strapline::text')
-        article_item['authors']['author']['author_position'] = response.xpath('div.sub-header__strapline::text')
+        author = response.xpath('//div[@class="sub-header sub-header--author"]')
+        # article_item['authors']['author']['author_name'] = author.xpath('//h1[@class="sub-header__page-title"]/text()').get().strip()
+        article_item['authors']['author']['author_position'] = author.css("div.sub-header__strapline::text").get().strip()
+        author_bio = author.css('.sub-header__description p ::text').getall()
+        author_bio = (' '.join(map(str, author_bio))).replace('  ', ' ').strip()
+        article_item['authors']['author']['author_bio'] = author_bio
+        article_item['authors']['author']['author_email'] = response.xpath("//a[@class='sub-header__content__link sub-header__content__link--email-address']/@href").get().replace("mailto:", '').strip()
+        article_item['authors']['author']['author_twitter'] = response.xpath('.//a[@class="sub-header__content__link sub-header__content__link--twitter-handle"]/@href').get().strip()
         yield article_item
 
 # class FT_Spider(scrapy.Spider):
