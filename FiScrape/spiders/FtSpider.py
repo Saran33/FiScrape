@@ -102,16 +102,15 @@ class FtSpider(scrapy.Spider):
                 bio_link = author.css("a.n-content-tag--author::attr(href)").extract()
                 bio_link = response.urljoin(''.join(map(str, bio_link)))
                 article_item['authors'][f'{auth}']['bio_link'] = bio_link
-                yield response.follow(bio_link, callback=self.parse_author, meta={'article_item': article_item}, cb_kwargs={'auth': article_item['authors'][f'{auth}']})
+                yield response.follow(bio_link, callback=self.parse_author, cb_kwargs={'article_item': article_item, 'auth': article_item['authors'][f'{auth}'].key()}) # meta={'article_item': article_item}
                 #yield from response.follow(author_url, callback=self.parse_author, cb_kwargs={'authors': article_item['authors']})
                 # meta={'article_item': article_item}
                 # 
         else:
             yield loader.load_item()
 
-    def parse_author(self, response, auth):
-        article_item = response.meta['article_item']
-        auth = response.cb_kwargs['auth']
+    def parse_author(self, response, article_item, auth):
+        # article_item = response.meta['article_item']
         author = response.xpath('//div[@class="sub-header sub-header--author"]')
         # article_item['authors']['author']['author_name'] = author.xpath('//h1[@class="sub-header__page-title"]/text()').get().strip()
         article_item['authors'][f'{auth}']['author_position'] = author.css("div.sub-header__strapline::text").get().strip()
