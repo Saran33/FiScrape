@@ -56,7 +56,10 @@ article_page = fetch(article_link, redirect=True)
 article_page = response.follow(article_link)
 article_page = scrapy.Request(article_link)
 # or:
-scrapy shell 'https://www.ft.com/content/dea06530-01a8-4e9e-90e4-d5edbf856505' --nolog
+scrapy shell 'https://www.ft.com/content/b9f6c876-22bb-498c-a425-78287455a3e1' --nolog
+# Multiple athors:
+scrapy shell 'https://www.ft.com/content/b26319f6-6cb7-4e0e-a0d9-bac71d9b8c34' --nolog
+
 head = response.css('head').get()
 response.css('body').get()
 body = response.css('body')
@@ -72,34 +75,108 @@ layout.css('p.article-info__byline').getall()
 response.css('p.article-info__byline').getall()
 article-info
 
-response.xpath("//div[@class='article__content']").get()
+article_content = response.xpath("//div[@class='article__content']").get()
 content = response.xpath("//div[@class='article__content']")
+response.xpath('//*[@id="site-content"]/div[3]/div[3]/p[2]/text()')
+article_content = response.xpath('//*[@class="article__content-body n-content-body js-article__content-body"]/p/text()')
 
-article = body.css('article.article.article-grid.article-grid--no-full-width-graphics').getall()
+#CONTENT:
+content = response.xpath('.//*/div[@class="article__content-body n-content-body js-article__content-body"]/*/p/text()').getall()
+content = response.xpath('//*[contains(@class, "article__content-body n-content-body js-article__content-body")]//text()[not(ancestor::*[@class="n-content-layout__container"])]').getall()
+article_content = normalize("NFKD",' '.join(map(str, content)).replace('  ', ' ').strip())
+article_content
+
+
+article_content.getall()
+
 body.css('li.o-header__drawer-menu-item').get()
+article = response.css('article.article.article-grid.article-grid--no-full-width-graphics').getall()
 content  = body[0].css('.div').getall()
 
+article_footnote = response.xpath('//*[contains(@class, "article__content-body n-content-body js-article__content-body")]/p[1]/em/text()[not(ancestor::*[@class="n-content-layout__container"])]').getall()
+article_footnote = response.xpath('//*[contains(@class, "article__content-body n-content-body js-article__content-body")]/p[1]/*[self::em or self::a]//text()[not(ancestor::*[@class="n-content-layout__container"])]').getall()
+
+summary = response.xpath('//*[@class="o-topper__standfirst"]/text()').get()
+if response.xpath('//*[@id="site-content"]/div[3]/div[2]/p[last()-1]/em/text()'):
+	article_footnote = response.xpath('//*[@id="site-content"]/div[3]/div[2]/p[last()-1]/em/text()').get()
+else:
+	article_footnote = response.xpath('//*[contains(@class, "article__content-body n-content-body js-article__content-body")]/p[1]/*[self::em or self::a]//text()[not(ancestor::*[@class="n-content-layout__container"])]').getall()
+
+last_paragraph = response.xpath('//*[@id="site-content"]/div[3]/div[3]/p/text()')[-1].get()
+last_paragraph = response.xpath('//*[@id="site-content"]/div[3]/div[3]/p[last()-1]/text()').get()
+image_caption = response.xpath('//*[@class="n-content-image__caption"]').getall()
+image_caption = response.xpath('//*[@id="site-content"]/div[1]/figure/figcaption/text()').get().replace(' ', ' ').strip()
+#top_comment = response.xpath('//*[@id="comment-1341de54-ec95-4728-99c1-ff221e44063c"]/div[2]/div/div/div/div/div[2]/div[1]/div[1]/text()')
+#top_comment = response.xpath('//*[@id="comment-7df83454-0e93-4352-b8f5-c2f52d8c7cfb"]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/text()')
 
 article = response.xpath("//article")
 
 <h1 class="o-topper__headline o-topper__headline--basic"><span class="article-classifier__gap">Finance industry warns against ‘unnecessarily restrictive’ crypto capital rules</span></h1>
 
-authors = body.css(".div.a.n-content-tag--author::text").getall()
+authors = response.css("a.n-content-tag--author")
+for author in authors:
+	author_name = author.css("a.n-content-tag--author::text").get()
+	print (author_name)
+	author_url = author.css("a.n-content-tag--author::attr(href)").extract()
+	author_url = response.urljoin(''.join(map(str, author_url)))
+	print (author_url)
 
-authors = response.css("a.n-content-tag--author::text").getall()
-authors = article.css("a.n-content-tag--author::text").getall()
-author_urls = article.css("a.n-content-tag--author::attr(href)").getall()
+authors = response.xpath('//*[@id="site-content"]/div[3]/div[1]/div/p/a/text()').getall()
+authors = response.xpath('//*[@id="site-content"]/div[3]/div[1]/div/p/a[1]/text()').getall()
+authors = response.css("a.n-content-tag--author::text").get()
+
+author_urls = response.css("a.n-content-tag--author::attr(href)").getall()
+author_urls = response.css("a.n-content-tag--author::attr(href)").get().extract()
+author_urls = response.css("a.n-content-tag--author::attr(href)").extract()
+for author_url in author_urls:
+	url_str = str(author_url)
+	url_str = ''.join(map(str, author_url))
+	print (type(author_url))
+	author_url = response.urljoin(url_str)
+	print (author_url)
+
+author_urls = response.css("a.n-content-tag--author::attr(href)").extract()
+for author_url in author_urls:
+	author_url = response.urljoin(str(author_url))
+	print (author_url)
 
 scrapy shell 'https://www.ft.com/laurence-fletcher/' --nolog
-author = response.xpath("//div[@class='sub-header sub-header--author']")
-bio = author.css("div.sub-header__strapline::text").get()
+author = response.xpath('//div[@class="sub-header sub-header--author"]')
+author_name = author.xpath('//h1[@class="sub-header__page-title"]/text()').get().strip()
+import time
+%timeit author_position = author.css("div.sub-header__strapline::text").get().strip()
+%timeit author_position = author.xpath('//div[@class="sub-header__strapline"]/text()').get().strip()
+author_bio = author.xpath('/html/body/div[1]/div[2]/div/div[2]/div/div/div/div[3]/div/p/text()').get()
+author_bio = author.xpath('//*[@class="sub-header__description"]/descendant::*/text()').get()
+author_bio = author.xpath('//*[@class="sub-header__description"]/descendant-or-self::*/text()').getall()
+author_bio = author.css('.sub-header__description p ::text').getall()
+author_bio = author.css('.sub-header__description p ::text').getall()
+author_bio = (' '.join(map(str, author_bio))).replace('  ', ' ').strip()
+author_bio
 
-email = response.xpath("//a[@class='sub-header__content__link sub-header__content__link--email-address']/@href").get()
+%timeit author_bio = author.xpath('//*[@class="sub-header__description"]/descendant-or-self::*/text()').getall()
+
+email = response.xpath("//a[@class='sub-header__content__link sub-header__content__link--email-address']/@href").get().replace("mailto:", '').strip()
 twitter = response.xpath("//a[@class='sub-header__content__link sub-header__content__link--twitter-handle']/@href").get()
 
-<a class="search-pagination__next-page o-buttons o-buttons--secondary o-buttons-icon o-buttons-icon--arrow-right o-buttons--big o-buttons-icon--icon-only" href="?q=bitcoin&amp;page=2&amp;sort=date" rel="nofollow" data-trackable="next-page">
-						<span class="o-buttons-icon__label">Next page</span>
-					</a>
+scrapy shell 'https://www.ft.com/mohamed-el-erian' --nolog
+author = response.xpath('//div[@class="sub-header sub-header--author"]')
+author_name = response.xpath('//h1[@class="sub-header__page-title"]/text()').get()
+bio = response.xpath('//*[class="sub-header__description"]/p/text()').get()
+bio = response.xpath('/html/body/div[1]/div[2]/div/div[2]/div/div/div/div[2]/div/p/text()').get()
+author_bio = response.xpath('//*[@class="sub-header__description"]/descendant-or-self::*/text()').getall()
+response.xpath('//div[@class="sub-header sub-header--author"]/div[1]/div[@class="o-grid-row"]/div[1]/div[@class="sub-header__content--non-expander"]/div[@class="sub-header__description"]/p').get()
+response.xpath('//*[@class="sub-header__description"]/p/text()').get()
+
+scrapy shell 'https://www.ft.com/yasemin-craggs-mersinoglu/' --nolog
+name = response.xpath('.//h1[@class="sub-header__page-title"]/text()')
+
+Or statements in Xpath:
+# //div[@class='data']/attribute::*[name()='data-property' or name()='data-name']
+if response.xpath('//*[@class="sub-header__description"]/p/text()'):
+	bio = response.xpath('//*[@class="sub-header__description"]/p/text()')
+	check = ("yes")
+print ("yes")
 
 LOGIN::
 https://accounts.ft.com/login?location=https%3A%2F%2Fwww.ft.com
@@ -132,3 +209,5 @@ CREATE TEMP TABLE Sentiment AS SELECT temp_sent2.id, published_date, subjectivit
 SELECT * FROM sentiment;
 COMMIT;
 .q
+
+

@@ -54,11 +54,13 @@ class Article(Base):
     published_date = Column('published_date', DateTime)
     headline = Column('headline', Text(), nullable=False)
     standfirst = Column('standfirst', Text())
-    # article_content = Column('article_content', Text())
+    summary = Column('summary', Text(), default=None)
+    image_caption = Column('image_caption', Text(), default=None)
+    content = Column('content', Text(), default=None)
+    footnote = Column('footnote', Text(), default=None)
     article_link = Column('article_link', Text())
     source_id = Column(Integer, ForeignKey('source.id')) # , nullable=False)  # Many articles to one source
     #source = relationship('Source', backref='articles', nullable=False)
-    #author_id = Column(Integer, ForeignKey('author.id'))  # Many articles to one author
     authors = relationship('Author', secondary='authors_association',
         lazy='dynamic', backref="article", overlaps="article,authors")  # M-to-M for article and authors
     topics = relationship('Topic', secondary='topics_association',
@@ -107,12 +109,13 @@ class Author(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column('name', String(50), unique=True, default=None)
+    position = Column('position', String(150), default=None)
     bio = Column('bio', Text(), default=None)
+    bio_link = Column('bio_link', Text(), default=None)
     twitter = Column('twitter', String(36), default=None)
     email = Column('email', String(50), default=None)
     birthday = Column('birthday', DateTime, default=None)
     bornlocation = Column('bornlocation', String(150), default=None)
-    # articles = relationship('Article', backref='author')  # One author to many Articles
     articles = relationship('Article', secondary='authors_association',
         lazy='dynamic', backref="author", overlaps="article,authors")  # M-to-M for article and authors
     # def __repr__(self):
