@@ -1,6 +1,6 @@
 # Define your item pipelines here
 #
-# Don't forget to add your pipeline to the ITEM_PIPELINES setting
+# Add pipelines to the ITEM_PIPELINES setting
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 
 
@@ -63,7 +63,7 @@ class SaveArticlesPipeline(object):
         self.stats.inc_value('scraped_items')
 
         # if isinstance(item, FT_AuthorItem):
-            # return self.process_author(item, spider)
+        # return self.process_author(item, spider)
         if isinstance(item, FT_ArticleItem):
             return self.process_article(item, spider)
         if isinstance(item, TestItem):
@@ -96,7 +96,7 @@ class SaveArticlesPipeline(object):
         sf = ' '.join(sf_list)
         sf = clean_text(sf)
         article.standfirst = sf
-        #article.standfirst = item["standfirst"]
+        # article.standfirst = item["standfirst"]
 
         if "article_summary" in item:
             article.summary = item["article_summary"]
@@ -109,17 +109,17 @@ class SaveArticlesPipeline(object):
         article.article_link = item["article_link"]
 
         topic = Topic(name=query.capitalize())
-        #topic.name = query.capitalize()
+        # topic.name = query.capitalize()
         # Check whether the topic already exists in the database
-        exist_topic = session.query(Topic).filter_by(name = topic.name).first()
+        exist_topic = session.query(Topic).filter_by(name=topic.name).first()
         if exist_topic is not None:  # the current topic exists
             topic = exist_topic
         article.topics.append(topic)
 
-        #source = Source(name=spider.name)
+        # source = Source(name=spider.name)
         source.name = spider.name
         # Check whether the source already exists in the database
-        exist_source = session.query(Source).filter_by(name = source.name).first()
+        exist_source = session.query(Source).filter_by(name=source.name).first()
         if exist_source is not None:  # the current author exists
             article.source = exist_source
         else:
@@ -149,15 +149,15 @@ class SaveArticlesPipeline(object):
 
         #check whether the current article has authors or not
         if "authors" in item:
-            for auth in item["authors"]:
-                author = Author(name=auth.key())
+            for author_name, auth in item["authors"].items():
+                author = Author(name=author_name)
                 # author.name = auth['author_name']
                 if 'author_position' in auth:
                     author.position = auth['author_position']
                 if "author_bio" in auth:
                     author.bio = auth["author_bio"]
                 if "bio_link" in auth:
-                    author.bio = auth["bio_link"]
+                    author.bio_link = auth["bio_link"]
                 if "author_twitter" in auth:
                     author.twitter = auth["author_twitter"]
                 if "author_email" in auth:
@@ -169,7 +169,7 @@ class SaveArticlesPipeline(object):
                 if "author_bornlocation" in auth:
                     author.bornlocation = auth["author_bornlocation"]
                 # check whether the author exists
-                exist_author = session.query(Author).filter_by(name = author.name).first()
+                exist_author = session.query(Author).filter_by(name=author.name).first()
                 if exist_author is not None:  # the current author exists
                     author = exist_author
                 article.authors.append(author)
@@ -179,18 +179,18 @@ class SaveArticlesPipeline(object):
             for tag_name in item["tags"]:
                 tag = Tag(name=tag_name)
                 # check whether the current tag already exists in the database
-                exist_tag = session.query(Tag).filter_by(name = tag.name).first()
+                exist_tag = session.query(Tag).filter_by(name=tag.name).first()
                 if exist_tag is not None:  # the current tag exists
                     tag = exist_tag
                 article.tags.append(tag)
 
         # Add sentiment scores
-        head = article.headline 
+        head = article.headline
         sf = article.standfirst
         # head = item["headline"]
         # sf = sf
-        text = ' — ...'.join([head,sf])
-        print ("TEXT:", text)
+        text = ' — ...'.join([head, sf])
+        print("TEXT:", text)
 
         snip_blob = SnipBlob()
 
@@ -200,7 +200,7 @@ class SaveArticlesPipeline(object):
         snip_blob.polarity = polarity_score
 
         snip_vader = SnipVader()
-        #SIA = 0
+        # SIA = 0
         SIA = self.get_SIA(text)
         compound = (SIA['compound'])
         neg = (SIA['neg'])
@@ -248,7 +248,7 @@ class SaveArticlesPipeline(object):
     # Get the sentiment scores
     def get_SIA(self, text):
         sia = SentimentIntensityAnalyzer()
-        sentiment =sia.polarity_scores(text)
+        sentiment = sia.polarity_scores(text)
         return sentiment
 
 # class DuplicatesPipeline(object):
@@ -299,15 +299,15 @@ class DuplicatesPipeline(object):
             return self.process_article(item, spider)
         if isinstance(item, TestItem):
             return item
-    
+
     def process_article(self, item, spider):
         session = self.Session()
-        exist_article = session.query(Article).filter_by(article_link = item["article_link"]).first()
+        exist_article = session.query(Article).filter_by(article_link=item["article_link"]).first()
         session.close()
         if exist_article is not None:  # the current article exists
             topic_name = query.capitalize()
             # if topic_name in exist_article.topics:
-            exist_topic = session.query(Topic).filter_by(name = topic_name).first()
+            exist_topic = session.query(Topic).filter_by(name=topic_name).first()
             if exist_topic is not None:  # the current topic exists
                 raise DropItem("Duplicate item found: %s" % item["headline"])
             else:

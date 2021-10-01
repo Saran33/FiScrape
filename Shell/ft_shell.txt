@@ -75,24 +75,37 @@ layout.css('p.article-info__byline').getall()
 response.css('p.article-info__byline').getall()
 article-info
 
-response.xpath("//div[@class='article__content']").get()
+article_content = response.xpath("//div[@class='article__content']").get()
 content = response.xpath("//div[@class='article__content']")
 response.xpath('//*[@id="site-content"]/div[3]/div[3]/p[2]/text()')
-response.xpath('//*[@class="article__content-body n-content-body js-article__content-body"]/p/text()').getall()
+article_content = response.xpath('//*[@class="article__content-body n-content-body js-article__content-body"]/p/text()')
 
-article = body.css('article.article.article-grid.article-grid--no-full-width-graphics').getall()
+#CONTENT:
+content = response.xpath('.//*/div[@class="article__content-body n-content-body js-article__content-body"]/*/p/text()').getall()
+content = response.xpath('//*[contains(@class, "article__content-body n-content-body js-article__content-body")]//text()[not(ancestor::*[@class="n-content-layout__container"])]').getall()
+article_content = normalize("NFKD",' '.join(map(str, content)).replace('  ', ' ').strip())
+article_content
+
+
+article_content.getall()
+
 body.css('li.o-header__drawer-menu-item').get()
+article = response.css('article.article.article-grid.article-grid--no-full-width-graphics').getall()
 content  = body[0].css('.div').getall()
+
+article_footnote = response.xpath('//*[contains(@class, "article__content-body n-content-body js-article__content-body")]/p[1]/em/text()[not(ancestor::*[@class="n-content-layout__container"])]').getall()
+article_footnote = response.xpath('//*[contains(@class, "article__content-body n-content-body js-article__content-body")]/p[1]/*[self::em or self::a]//text()[not(ancestor::*[@class="n-content-layout__container"])]').getall()
 
 summary = response.xpath('//*[@class="o-topper__standfirst"]/text()').get()
 if response.xpath('//*[@id="site-content"]/div[3]/div[2]/p[last()-1]/em/text()'):
 	article_footnote = response.xpath('//*[@id="site-content"]/div[3]/div[2]/p[last()-1]/em/text()').get()
 else:
-	article_footnote = response.xpath('//*[@id="site-content"]/div[3]/div[3]/p[1]/em/text()').get()
+	article_footnote = response.xpath('//*[contains(@class, "article__content-body n-content-body js-article__content-body")]/p[1]/*[self::em or self::a]//text()[not(ancestor::*[@class="n-content-layout__container"])]').getall()
 
 last_paragraph = response.xpath('//*[@id="site-content"]/div[3]/div[3]/p/text()')[-1].get()
 last_paragraph = response.xpath('//*[@id="site-content"]/div[3]/div[3]/p[last()-1]/text()').get()
-image_caption = response.xpath('//*[@class="n-content-image__caption"]').get()
+image_caption = response.xpath('//*[@class="n-content-image__caption"]').getall()
+image_caption = response.xpath('//*[@id="site-content"]/div[1]/figure/figcaption/text()').get().replace(' ', ' ').strip()
 #top_comment = response.xpath('//*[@id="comment-1341de54-ec95-4728-99c1-ff221e44063c"]/div[2]/div/div/div/div/div[2]/div[1]/div[1]/text()')
 #top_comment = response.xpath('//*[@id="comment-7df83454-0e93-4352-b8f5-c2f52d8c7cfb"]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/text()')
 
@@ -129,17 +142,21 @@ for author_url in author_urls:
 
 scrapy shell 'https://www.ft.com/laurence-fletcher/' --nolog
 author = response.xpath('//div[@class="sub-header sub-header--author"]')
-author_name = response.xpath('//h1[@class="sub-header__page-title"]/text()').get()
-author_position = response.css("div.sub-header__strapline::text").get().strip()
-author_position = response.xpath('//div[@class="sub-header__strapline"]/text()').get()
-author_bio = response.xpath('/html/body/div[1]/div[2]/div/div[2]/div/div/div/div[3]/div/p/text()').get()
-author_bio = response.xpath('//*[@class="sub-header__description"]/descendant::*/text()').get()
-author_bio = response.xpath('//*[@class="sub-header__description"]/descendant-or-self::*/text()').getall()
-author_bio = response.css('.sub-header__description p ::text').getall()
-author_bio = response.css('.sub-header__description p').get()
-author_bio = response.xpath('//*[@class="sub-header__description"]/descendant-or-self::*/text()').getall()
+author_name = author.xpath('//h1[@class="sub-header__page-title"]/text()').get().strip()
+import time
+%timeit author_position = author.css("div.sub-header__strapline::text").get().strip()
+%timeit author_position = author.xpath('//div[@class="sub-header__strapline"]/text()').get().strip()
+author_bio = author.xpath('/html/body/div[1]/div[2]/div/div[2]/div/div/div/div[3]/div/p/text()').get()
+author_bio = author.xpath('//*[@class="sub-header__description"]/descendant::*/text()').get()
+author_bio = author.xpath('//*[@class="sub-header__description"]/descendant-or-self::*/text()').getall()
+author_bio = author.css('.sub-header__description p ::text').getall()
+author_bio = author.css('.sub-header__description p ::text').getall()
+author_bio = (' '.join(map(str, author_bio))).replace('  ', ' ').strip()
+author_bio
 
-email = response.xpath("//a[@class='sub-header__content__link sub-header__content__link--email-address']/@href").get()
+%timeit author_bio = author.xpath('//*[@class="sub-header__description"]/descendant-or-self::*/text()').getall()
+
+email = response.xpath("//a[@class='sub-header__content__link sub-header__content__link--email-address']/@href").get().replace("mailto:", '').strip()
 twitter = response.xpath("//a[@class='sub-header__content__link sub-header__content__link--twitter-handle']/@href").get()
 
 scrapy shell 'https://www.ft.com/mohamed-el-erian' --nolog
@@ -192,3 +209,5 @@ CREATE TEMP TABLE Sentiment AS SELECT temp_sent2.id, published_date, subjectivit
 SELECT * FROM sentiment;
 COMMIT;
 .q
+
+

@@ -23,6 +23,9 @@ if 'test' not in sys.argv[1]:
     elif start_date== 'w':
         start_date = datetime.utcnow()
         start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=7)
+    elif start_date== 'm':
+        start_date = datetime.utcnow()
+        start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=30)
     if type(start_date) is str:
         start_date = datetime.strptime(start_date,'%Y-%m-%d')
     start_date = timezone("UTC").localize(start_date)

@@ -30,7 +30,7 @@ def strp_dt(text):
 def remove_articles(text):
     # strip the unicode articles
     #text = normalize("NFKD", text.strip(u'\u201c'u'\u201d'))
-    text = normalize("NFKD", ' '.join(map(str, text)).replace('  ', ' ').strip())
+    text = normalize("NFKD", ''.join(map(str, text)).replace('  ', ' ').strip())
     return text
 
 def remove_space(text):
