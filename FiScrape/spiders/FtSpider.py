@@ -115,13 +115,13 @@ class FtSpider(scrapy.Spider):
 
     def get_urls(self, bio_links):
         reqs = [grequests.get(bio_link) for bio_link in bio_links]
-        resp = grequests.map(reqs)
-        return resp
+        resps = grequests.map(reqs)
+        return resps
 
 
-    def process_author(self, article_item, resp):
+    def process_author(self, article_item, resps):
         authors = article_item['authors']
-        for (auth, response) in zip(authors.keys(), resp):
+        for (auth, response) in zip(authors.keys(), resps):
             page_source = BeautifulSoup(response.text, 'lxml')
             try:
                 pos = page_source.find('div', attrs={'class': "sub-header__strapline"}).text.strip()
