@@ -1,15 +1,11 @@
 import scrapy
 from scrapy.loader import ItemLoader
-from FiScrape.items import FT_ArticleItem, convert_ft_dt, InsiderArticleItem, \
-    convert_bi_dt  # FT_AuthorItem, AuthorItemLoader
-from datetime import date, datetime, timedelta
-from pytz import timezone
-from dateutil import parser
-from scrapy.selector import Selector
+from FiScrape.items import FtArtItem, convert_ft_dt
 from FiScrape.search import query, start_date
 from unicodedata import normalize
 from bs4 import BeautifulSoup
 # import random
+# from scrapy.selector import Selector
 # from scrapy.http import Request
 # import requests as rq
 import grequests
@@ -51,7 +47,7 @@ class FtSpider(scrapy.Spider):
             published_date = snippet.css('div.o-teaser__timestamp time.o-teaser__timestamp-date::attr(datetime)').get()
             published_date = convert_ft_dt(published_date)
             if published_date >= start_date:
-                loader = ItemLoader(item=FT_ArticleItem(), selector=snippet)
+                loader = ItemLoader(item=FtArtItem(), selector=snippet)
                 loader.add_css('published_date',
                                'div.o-teaser__timestamp time.o-teaser__timestamp-date::attr(datetime)')
                 loader.add_css('headline', "a.js-teaser-heading-link *::text")

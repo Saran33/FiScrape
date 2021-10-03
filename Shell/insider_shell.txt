@@ -69,3 +69,57 @@ author_bio = response.xpath('.//*[@id="l-content"]/section[1]/div/div[2]/p/text(
  author_email = response.xpath('.//*[@class="author-contact-icon-link share-link email"]/@href').get()
 
  author_twitter = response.xpath('.//*[@class="author-contact-icon-link share-link twitter"]/@href').get()
+
+
+01-10-2021:
+scrapy shell "https://markets.businessinsider.com/news/stocks/stock-market-news-today-merck-drug-helping-end-covid19-pandemic-2021-10" --nolog
+scrapy shell 'https://markets.businessinsider.com/news/currencies/stablecoin-regulation-cryptocurrency-banks-biden-treasury-bitcoin-circle-tether-binance-2021-10' --nolog
+authors = response.css('div.news-post-source')
+for author in authors:
+    auth = author.css('a::text').get()
+auth
+bio_link = author.css('a::attr(href)').get()
+
+bio_link = author.css('a::attr(href)').extract()
+bio_link = response.urljoin(''.join(map(str, bio_link)))
+bio_link
+
+summary = response.css('#piano-inline-content-wrapper > div > div > ul ::text')
+response.css('body > main > div > div:nth-child(3) > div.col-md-8.col-xs-12 > div.row > div.col-xs-12.news-content.no-padding > ul:nth-child(2) ::text').getall()
+response.css('div.col-xs-12.news-content.no-padding > ul:nth-child(2) > li ::text').getall()
+response.css("div[id='content']:not([class*='infobox'])").getall()
+response.css("div.col-xs-12.news-content.no-padding > ul > li:not([aria-level*='1']) ::text").getall()
+
+import time
+%timeit image_caption = response.css('figcaption::text').getall()
+%timeit image_caption = response.xpath('.//figcaption/text()').getall()
+
+article_content = response.css('div.col-xs-12.news-content.no-padding > p ::text').getall()
+article_content = response.css('div.col-xs-12.news-content.no-padding *:not([class*="read-original"]) :not(div.read-original.a) ::text').getall()
+article_content = response.css('div.col-xs-12.news-content.no-padding > p ::text, div.col-xs-12.news-content.no-padding > p > a ::text, div.col-xs-12.news-content.no-padding > ul > li[aria-level*="1"] ::text').getall()
+
+from unicodedata import normalize
+def remove_articles(text):
+    text = normalize("NFKD", ''.join(map(str, text)).replace('  ', ' ').strip())
+    return text
+
+lines = []
+for line in article_content:
+    line = remove_articles(line)
+    lines.append(line)
+content = ' '.join(lines)
+content
+
+article_footnote = response.css('div.read-original ::text').getall()
+
+scrapy shell 'https://www.businessinsider.com/author/francis-agustin'
+
+
+import time
+%timeit author_bio = response.xpath('.//*[@class="col-12 col-md-8 author-description"]/p/text()').getall()
+%timeit author_bio = response.css('div.col-12.col-md-8.author-description > p ::text').getall()
+
+%timeit author_email = response.xpath('.//*[@class="author-contact-icon-link share-link email"]/@href').get()
+%timeit author_email = response.css('a.author-contact-icon-link.share-link.email::attr(href)').get()
+
+ author_twitter = response.xpath('.//*[@class="author-contact-icon-link share-link twitter"]/@href').get()

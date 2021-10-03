@@ -1,0 +1,190 @@
+
+Check for JS: in cchrome dev > Network mode, then from dropdown, click "Slow 3G."
+Reset it if the page is rendering JS. (or just close dev to rset it)
+F1 for settings > Debugger > disable JS.
+Reload page with dev open.
+
+scrapy shell "https://www.bbc.co.uk/search?q=bitcoin" --nolog
+scrapy shell "https://www.bbc.co.uk/search?q=bitcoin&page=3" --nolog
+
+import time
+%timeit
+
+%timeit snippets = response.css('ul.ssrcss-v19xcd-Stack.e1y4nx260 > li')
+%timeit snippets = response.xpath('//*/ul[@class="ssrcss-v19xcd-Stack e1y4nx260"]/li')
+
+%timeit snippets = response.css('ul.ssrcss-v19xcd-Stack.e1y4nx260 > li')
+snippets = response.css('ul.ssrcss-v19xcd-Stack.e1y4nx260 > li')
+for snippet in snippets:
+    published_date = snippet.xpath('.//*[@class="ssrcss-8d0yke-MetadataStripItem e1ojgjhb1"][1]/dd/span/text()').get()
+    print (published_date)
+
+%timeit snippets = response.xpath('//*/ul[@class="ssrcss-v19xcd-Stack e1y4nx260"]/li')
+for snippet in snippets:
+    published_date = snippet.xpath('.//*[@class="ssrcss-8d0yke-MetadataStripItem e1ojgjhb1"][1]/dd/span/text()').get()
+    print (published_date)
+
+
+last_date = snippets[-1].xpath('.//*[@class="ssrcss-8d0yke-MetadataStripItem e1ojgjhb1"][1]/dd/span/text()').get()
+
+from dateutil import parser
+from datetime import datetime, timedelta
+dt = parser.parse(last_date)
+print (dt)
+
+try:
+    dt = parser.parse(published_date)
+except:
+    delta = int(published_date.split(" ")[0])
+    unit = published_date.split(" ")[1]
+    print (unit, delta)
+    if unit == 'days':
+        dt = datetime.utcnow() - timedelta(days=delta)
+    elif unit == 'hours':
+        dt = datetime.utcnow() - timedelta(hours=delta)
+    elif unit == 'minutes':
+        dt = datetime.utcnow() - timedelta(minutes=delta)
+    elif unit == 'seconds':
+        dt = datetime.utcnow() - timedelta(seconds=delta)
+    elif unit == 'weeks':
+        dt = datetime.utcnow() - timedelta(weeks=delta)
+    elif unit == 'microseconds':
+        dt = datetime.utcnow() - timedelta(microseconds=delta)
+dt = dt.replace(hour=0, minute=0, second=0, microsecond=0)
+print (dt)
+
+from dateutil import parser
+from datetime import datetime,timedelta
+from pytz import timezone
+def time_ago_str(text):
+    """Converts a timedelta text string of 'n*T ago' in a UTC datetime.
+    e.g. "5 days ago" will become a UTC datetime (timezone aware).
+    """
+    try:
+        dt = parser.parse(text)
+    except:
+        try:
+            delta = int(text.split(" ")[0])
+            unit = text.split(" ")[1]
+            if (unit == 'days') or (unit == 'day'):
+                dt = datetime.utcnow() - timedelta(days=delta)
+            elif (unit == 'hours') or (unit == 'hour'):
+                dt = datetime.utcnow() - timedelta(hours=delta)
+            elif (unit == 'minutes') or (unit == 'minute'):
+                dt = datetime.utcnow() - timedelta(minutes=delta)
+            elif (unit == 'seconds') or (unit == 'second'):
+                dt = datetime.utcnow() - timedelta(seconds=delta)
+            elif (unit == 'weeks') or (unit == 'week'):
+                dt = datetime.utcnow() - timedelta(weeks=delta)
+            elif (unit == 'microseconds') or (unit == 'microsecond'):
+                dt = datetime.utcnow() - timedelta(microseconds=delta)
+            dt = dt.replace(hour=0, minute=0, second=0, microsecond=0)
+        except:
+            return None
+    dt = timezone("UTC").localize(dt)
+    return dt
+
+text = '1 week ago'
+dt = time_ago_str(text)
+print (dt)
+
+for snippet in snippets:
+    published_date = snippet.xpath('.//*[@class="ssrcss-8d0yke-MetadataStripItem e1ojgjhb1"][1]/dd/span/text()').get()
+    print (published_date)
+    dt = time_ago_str(published_date)
+    print(dt)
+
+    published_date = time_ago_str(published_date)
+
+headline = snippets[0].xpath('//*[@id="main-content"]/div[1]/div[3]/div/div/ul/li[2]/div/div/div[1]/div[1]/p/text()').getall()
+headline = response.xpath('//*[@class="ssrcss-som5se-PromoContent e1f5wbog7"]/*/a/span/p/span/text()').getall()
+headline = snippets.xpath('.//a/span/p/span/text()').getall()
+
+%timeit headline = snippets[0].xpath('.//a/span/p/span/text()').get()
+%timeit headline = snippets[0].css('a > span > p > span::text').get()
+
+%timeit standfirst = snippets[0].xpath('.//p/text()').get()
+%timeit standfirst = snippets[0].css('p::text').get()
+
+tags = snippets[0].css('div > dl > div:nth-child(2) > dd > span ::text, div > dl > div:nth-child(3) > dd > span ::text').getall()
+
+%timeit article_url = snippets[0].xpath('//*[@id="main-content"]/div[1]/div[3]/div/div/ul/li[4]/div/div/div[1]/div[1]/a/@href').get()
+%timeit article_url = snippets[0].xpath('.//*/a/@href').get()
+%timeit article_url = snippets[0].css('a::attr(href)').get()
+
+next_pages = response.xpath('//*[@id="main-content"]/div[1]/div[4]/div/div/div/div/nav/div[3]/div/ol//a/@href').getall()
+next_pages = response.xpath('//*[@id="main-content"]/div[1]/div[4]/div/div/div/div/nav/div[3]/div/ol//a').getall()
+%timeit next_pages = response.xpath('//*[@class="ssrcss-i7uuy0-Cluster e1ihwmse1"]/ol//a').getall()
+%timeit next_pages = response.css('.ssrcss-i7uuy0-Cluster.e1ihwmse1 > ol a').getall()
+
+%timeit next_page_last = response.xpath('//*/div[@class="ssrcss-zhhf7y-PageButtonContainer e1b2sq420"]/a').get()
+
+
+
+scrapy shell 'https://www.bbc.com/news/business-58424832' --nolog
+scrapy shell 'https://www.bbc.com/news/technology-58572385' --nolog
+
+published_date = response.xpath('//article/header//time/@datetime').get()
+from pytz import timezone
+from dateutil import parser
+from FiScrape.items import parse_dt
+def parse_dt(text):
+    """
+    convert a string to Python date with dateutil, add utc timezone.
+    """
+    dt = parser.parse(text)
+    try:
+        dt = timezone("UTC").localize(dt)
+    except:
+        pass
+    return dt
+dt = parse_dt(published_date)
+print (dt)
+
+dt = parse_utc_dt(published_date)
+print (dt)
+
+article_summary = response.xpath('//article/div[@data-component="text-block"][1]/div/p/b/text()').get()
+image_caption = response.xpath('//figcaption/text()').getall()
+
+article_content = response.css(
+            'article > div[data-component=text-block] > div > p ::text, article > div[data-component=crosshead-block] > h2').getall()
+
+bold_text = response.css('article > div[data-component=text-block] > div > p > b ::text').getall()
+article_footnote = []
+for para in bold_text:
+    if para not in article_summary:
+        article_footnote.append(para)
+if article_footnote:
+    print (article_footnote)
+else:
+    print ("None")
+
+# BBC Radio:
+scrapy shell 'https://www.bbc.co.uk/programmes/w3ct1nhf' --nolog
+scrapy shell 'https://www.bbc.co.uk/programmes/w3ct20ff' --nolog
+import time
+published_date = response.xpath('//*[@id="orb-modules"]/div/div/div[2]/div[2]/div/div[2]/div/div[1]/div/div/div[2]/div[1]/@content').get()
+%timeit published_date = response.css('div.broadcast-event__time.beta::attr(content)').get()
+%timeit published_date = response.xpath('//*/div[@class="broadcast-event__time beta"]/@content').get()
+
+published_date = response.xpath('//*/div[@class="broadcast-event__time beta"]/@content').get()
+if not published_date:
+    published_date = response.xpath('//article/header//time/@datetime').get()
+published_date
+
+%timeit article_summary = response.css('div.synopsis-toggle__long > p:first-of-type::text').get()
+%timeit article_summary = response.xpath('//*/div[@class="synopsis-toggle__long"]/p[1]/text()').get()
+
+article_summary = response.xpath('//*/div[@class="synopsis-toggle__long"]/p[1]/text()').get()
+
+'//a[contains(@href,"/programmes/w3ct20ff")]'
+
+query = 'bitcoin'
+'//*/div[@class="synopsis-toggle__long"]/p[contains(.,'Image') and not(contains(.,'f{query}'))]
+
+article_summary = response.xpath('//*/div[@class="synopsis-toggle__long"]/p[not(contains(.,"Image:"))][not(contains(.,"Photo:"))]/text()').getall()
+
+%timeit image_caption = response.xpath('//*/div[@class="synopsis-toggle__long"]/p[2]/text()').get()
+
+image_caption = response.xpath('//*/div[@class="synopsis-toggle__long"]/p[(contains(.,"Image:")) or (contains(.,"Photo:"))]/text()').getall()
