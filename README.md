@@ -31,7 +31,7 @@ $ sudo docker pull scrapinghub/splash
 ```zsh
 $ docker pull scrapinghub/splash
 ```
- 3. Start the container:
+3. Start the container:
 ##### Linux:
 ```zsh
 $ sudo docker run -it -p 8050:8050 --rm scrapinghub/splash
@@ -40,6 +40,10 @@ $ sudo docker run -it -p 8050:8050 --rm scrapinghub/splash
 ##### OS X:
 ```zsh
 $ docker run -it -p 8050:8050 --rm scrapinghub/splash
+```
+or to simply run it:
+```zsh
+docker run -p 8050:8050 scrapinghub/splash
 ```
 (Splash is available at 0.0.0.0 address at port 8050 (http))
 - Alternatively, use the Docker desktop app. Splash is found under the 'images' tab. Hover over it, click 'run'. In additional settings, name the container 'splash', and select a port such as 8050. Click 'run.' 
