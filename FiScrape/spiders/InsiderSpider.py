@@ -52,8 +52,8 @@ class InsiderSpider(scrapy.Spider):
         last_date = convert_bi_dt(last_date)
         if last_date >= start_date:
             # Go to next search page
-            for a in response.xpath('.//*[@id="l-content"]/a').get():
-                yield response.follow(a, callback=self.parse)
+            for href in response.xpath('.//*[@id="l-content"]/a/@href').get():
+                yield response.follow(href, callback=self.parse)
 
     def parse_article(self, response):
         article_item = response.meta['article_item']
