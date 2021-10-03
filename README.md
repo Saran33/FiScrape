@@ -23,17 +23,23 @@ or
 FiScrape requires [Docker](https://docs.docker.com/desktop/) and [Splash](https://splash.readthedocs.io/en/stable/install.html) to scrape some websites that render in Javascript.
 1. Download Docker at the above link.
 2. As per the above Splash installation docs, pull the splash image with:
- `$ sudo docker pull scrapinghub/splash` for Linux 
- or `$ docker pull scrapinghub/splash` for OS X.
- 3. Start the container:
- Linux:
+##### Linux:
 ```zsh
-$ sudo docker run -it -p 8050:8050 --rm scrapinghub/splash`
+$ sudo docker pull scrapinghub/splash
+```
+##### OS X:
+```zsh
+$ docker pull scrapinghub/splash
+```
+ 3. Start the container:
+##### Linux:
+```zsh
+$ sudo docker run -it -p 8050:8050 --rm scrapinghub/splash
 ```
 (Splash is now available at 0.0.0.0 at port 8050 (http))
-OS X:
+##### OS X:
 ```zsh
-`$ docker run -it -p 8050:8050 --rm scrapinghub/splash`
+$ docker run -it -p 8050:8050 --rm scrapinghub/splash
 ```
 (Splash is available at 0.0.0.0 address at port 8050 (http))
 - Alternatively, use the Docker desktop app. Splash is found under the 'images' tab. Hover over it, click 'run'. In additional settings, name the container 'splash', and select a port such as 8050. Click 'run.' 
@@ -112,5 +118,3 @@ The data is then passed to a preprocessing pipeline. The categorical featues are
 The example model is a basic Linear Discriminat Analysis classification model. This of course doesn't capture the sequential importance of features. The LDA is useful for dimensionality reduction though, so its outputs could be passed to a neural network.
 
 Finally, the example contains a Backtrader backtesting environment, as well as Pyfolio analysis.
-
-
