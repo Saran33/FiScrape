@@ -123,3 +123,7 @@ import time
 %timeit author_email = response.css('a.author-contact-icon-link.share-link.email::attr(href)').get()
 
  author_twitter = response.xpath('.//*[@class="author-contact-icon-link share-link twitter"]/@href').get()
+
+
+ ## 
+next_page = response.xpath('//*[@id="l-content"]/a/@href').get()
