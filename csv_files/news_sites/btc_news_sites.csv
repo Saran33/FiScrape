@@ -9,9 +9,9 @@ ZeroHedge,https://www.zerohedge.com/search-content?qTitleBody=Bitcoin&page=0,1
 Seeking Alpha News,https://seekingalpha.com/symbol/BTC-USD/news,1
 Seeking Alpha Analysis,https://seekingalpha.com/symbol/BTC-USD/analysis,1
 Business Insider,https://markets.businessinsider.com/currencies/btc-usd,0
-Yahoo Finance,https://finance.yahoo.com/quote/BTC-USD?p=BTC-USD&.tsrc=fin-srch,0
+Yahoo Finance,https://finance.yahoo.com/quote/?yfin-usr-qry=bitcoin&fr=uh3_finance_vert&fr2=p%3Afinvsrp%2Cm%3Asb,1
 Kitco,https://www.kitco.com/search/?q=bitcoin,1
-Financial News,https://www.fnlondon.com/search/bitcoin,0
+Financial News,https://www.fnlondon.com/search/bitcoin,1
 Fast Company,https://www.fastcompany.com/search?searchkey=bitcoin,1
 BBC,https://www.bbc.co.uk/search?q=Bitcoin,0
 CNN,https://edition.cnn.com/search?q=Bitcoin&size=10&sort=newest,1

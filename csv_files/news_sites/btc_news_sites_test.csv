@@ -1,3 +1,4 @@
 ﻿Source,URL,JS
 FT,https://www.ft.com/search?q=Bitcoin&sort=date,0
 WSJ,https://www.wsj.com/search?query=Bitcoin&mod=searchresults_viewallresults,1
+Yahoo,https://finance.yahoo.com/quote/?yfin-usr-qry=bitcoin&fr=uh3_finance_vert&fr2=p%3Afinvsrp%2Cm%3Asb,1

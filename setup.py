@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 setup(
     name='FiScrape',
     packages=find_packages(include=['tutorial']),
-    version='0.1.6',
+    version='0.1.61',
 	author='Saran Connolly',
     description='Financial news scraping and processing.',
 	long_description=long_description,
@@ -22,7 +22,9 @@ setup(
     ],
 	install_requires = [
   #'pwe @ git+https://github.com/Saran33/pwe_analysis.git',
-        'pandas','numpy', 'pytz', 'Scrapy>=1.7.3', 'SQLAlchemy>=1.3.6'
+        'pandas','numpy', 'pytz', 'Scrapy>=1.7.3', 'SQLAlchemy>=1.3.6',
+        'scrapy-splash', 'grequests', 'beautifulsoup4', 'python-dateutil',
+        'pytz',
 ],
 	#package_dir={"": "src"},
     #packages=find_packages(where="pwe"),

@@ -12,11 +12,11 @@ from FiScrape.items import TestItem
 class TestSpider(scrapy.Spider):
     name = "test"
 
-    default_file = "csv_files/news_sites/btc_news_sites.csv"
-    test_file = "csv_files/news_sites/btc_news_sites_test.csv"
-
-    def start_requests(self, default_file, test_file):
+    def start_requests(self):
         """Loop through a CSV of links and return the html for each page."""
+
+        default_file = "csv_files/news_sites/btc_news_sites.csv"
+        test_file = "csv_files/news_sites/btc_news_sites_test.csv"
 
         f_path = input('Enter a csv file path with a "URL" columm (d for default, t for test): ').strip().strip('"').strip("'")
         if f_path.lower() == 'd':

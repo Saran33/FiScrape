@@ -15,6 +15,7 @@ from datetime import date, datetime,timedelta
 from pytz import timezone
 from dateutil import parser
 from unicodedata import normalize
+import re
 
 def strp_dt(text):
     """
@@ -24,8 +25,57 @@ def strp_dt(text):
         dt = datetime.strptime(text, "%Y-%m-%d")
     except:
         dt = parser.parse(text)
-    dt = timezone.utc.localize(dt)
+    # dt = timezone.utc.localize(dt)
+    dt = timezone("UTC").localize(dt)
     return dt
+
+def parse_dt(text):
+    """
+    convert a string to Python date with dateutil, add utc timezone if not already set.
+    """
+    dt = parser.parse(text)
+    try:
+        dt = timezone("UTC").localize(dt)
+    except:
+        pass
+    return dt
+
+def parse_utc_dt(text):
+    """
+    convert a string which already has UTC tz info to Python datetime, with dateutil.
+    """
+    return parser.parse(text)
+
+def time_ago_str(text):
+    """Converts a timedelta text string of 'n*T ago' in a UTC datetime.
+    e.g. "5 days ago" will become a UTC datetime (timezone aware).
+    """
+    try:
+        dt = parser.parse(text)
+    except:
+        try:
+            delta = int(text.split(" ")[0])
+            unit = text.split(" ")[1]
+            if (unit == 'days') or (unit == 'day'):
+                dt = datetime.utcnow() - timedelta(days=delta)
+            elif (unit == 'hours') or (unit == 'hour'):
+                dt = datetime.utcnow() - timedelta(hours=delta)
+            elif (unit == 'minutes') or (unit == 'minute'):
+                dt = datetime.utcnow() - timedelta(minutes=delta)
+            elif (unit == 'seconds') or (unit == 'second'):
+                dt = datetime.utcnow() - timedelta(seconds=delta)
+            elif (unit == 'weeks') or (unit == 'week'):
+                dt = datetime.utcnow() - timedelta(weeks=delta)
+            elif (unit == 'microseconds') or (unit == 'microsecond'):
+                dt = datetime.utcnow() - timedelta(microseconds=delta)
+            dt = dt.replace(hour=0, minute=0, second=0, microsecond=0)
+        except:
+            return None
+    dt = timezone("UTC").localize(dt)
+    return dt
+
+def join_str_lst(text):
+    return ','.join(text)
 
 def remove_articles(text):
     # strip the unicode articles
@@ -110,9 +160,16 @@ def strip_ft_bio(text):
 def remove_mail_to(text):
     return text.replace("mailto:", '').strip()
 
-def add_domain(text):
+def add_ft_domain(text):
     domain_name ='https://www.ft.com'
-    #domain_name = spider.domain
+    return f"{domain_name}{text}".strip()
+
+def add_bi_domain(text):
+    domain_name ='https://www.businessinsider.com'
+    return f"{domain_name}{text}".strip()
+
+def add_bbc_domain(text):
+    domain_name ='https://www.bbc.co.uk'
     return f"{domain_name}{text}".strip()
 
 # def add_domain(text):
@@ -124,13 +181,17 @@ def parse_location(text):
     # this simply remove "in ", you can further parse city, state, country, etc.
     return text[3:]
 
+def strip_bbc_h2(text):
+    return  text.replace(' class="ssrcss-1s5ma9r-StyledHeading e1fj1fc10"', '').replace('class="ssrcss-1s5ma9r-StyledHeading e1fj1fc10', '').replace(
+        ' class="ssrcss-1s5ma9r-StyledHeading ', '').replace('e1fj1fc10"', '')
+
 class TestItem(Item):
     Field(
         input_processor=Identity(),
         output_processor=Identity()
         )
 
-class FT_ArticleItem(Item):
+class FtArtItem(Item):
     published_date = Field(
         input_processor=MapCompose(convert_ft_dt),
         # TakeFirst return the first value not the whole list
@@ -169,7 +230,7 @@ class FT_ArticleItem(Item):
         output_processor=Join()
         )
     article_link = Field(
-        input_processor=MapCompose(add_domain),
+        input_processor=MapCompose(add_ft_domain),
         output_processor=TakeFirst()
         )
     # authors = Field(
@@ -215,102 +276,74 @@ class FT_ArticleItem(Item):
 #     default_output_processor=TakeFirst()
 #     default_item_class=FT_AuthorItem
 
-class InsiderArticleItem(Item):
+class InsiderArtItem(Item):
     published_date = Field(
         input_processor=MapCompose(convert_bi_dt),
-        # TakeFirst return the first value not the whole list
         output_processor=TakeFirst()
         )
     headline = Field(
         input_processor=MapCompose(extract_headline),
-        # TakeFirst return the first value not the whole list
         output_processor=Join()
         )
-    # article_content = Field(
-    #     input_processor=MapCompose(remove_articles),
-    #     # TakeFirst return the first value not the whole list
-    #     output_processor=TakeFirst()
-    #     )
-    # standfirst = Field(
-    #     input_processor=MapCompose(extract_standfirst),
-    #     output_processor=Join()
-    #     )
     standfirst = Field(
-        # Processed in pipeline due to limitations of Scrapy processors
+        )
+    article_summary = Field(
+        input_processor=MapCompose(extract_headline),
+        output_processor=Join()
+        )
+    image_caption = Field(
+        input_processor=MapCompose(remove_articles),
+        output_processor=Join()
+        )
+    article_content = Field(
+        input_processor=MapCompose(remove_articles),
+        output_processor=Join()
+        )
+    article_footnote = Field(
+        input_processor=MapCompose(remove_articles),
+        output_processor=Join()
         )
     article_link = Field(
-        input_processor=MapCompose(add_domain),
+        input_processor=MapCompose(add_bi_domain),
         output_processor=TakeFirst()
         )
-    author_names = Field(
-        #input_processor=MapCompose(str.strip),
-        #input_processor=Compose(str.strip),
-        #output_processor=TakeFirst()
-        )
-    author_bio = Field(
-        input_processor=MapCompose(strip_ft_bio),
-        output_processor=TakeFirst()
-        )
-    author_twitter = Field(
-        input_processor=MapCompose(str.strip),
-        output_processor=TakeFirst()
-        )
-    author_email = Field(
-        input_processor=MapCompose(remove_mail_to),
-        output_processor=TakeFirst()
+    authors = Field(
+        input_processor=Identity()
         )
     tags = Field()
 
-# class ArticleItem(Item):
-#     published_date = Field(
-#         input_processor=MapCompose(convert_date),
-#         # TakeFirst return the first value not the whole list
-#         output_processor=TakeFirst()
-#         )
-#     headline = Field(
-#         input_processor=MapCompose(remove_space),
-#         # TakeFirst return the first value not the whole list
-#         output_processor=TakeFirst()
-#         )
-#     # article_content = Field(
-#     #     input_processor=MapCompose(remove_articles),
-#     #     # TakeFirst return the first value not the whole list
-#     #     output_processor=TakeFirst()
-#     #     )
-#     standfirst = Field(
-#         input_processor=MapCompose(remove_space),
-#         # TakeFirst return the first value not the whole list
-#         output_processor=TakeFirst()
-#         )
-#     # category = Field(
-#     #     input_processor=MapCompose(remove_space),
-#     #     # TakeFirst return the first value not the whole list
-#     #     output_processor=TakeFirst()
-#     #     )
-#     author_names = Field(
-#         input_processor=MapCompose(str.strip),
-#         #output_processor=TakeFirst()
-#         )
-#     article_link = Field(
-#         input_processor=MapCompose(str.strip),
-#         output_processor=TakeFirst()
-#         )
-#     # author_birthday = Field(
-#     #     input_processor=MapCompose(convert_date),
-#     #     output_processor=TakeFirst()
-#     # )
-#     # author_bornlocation = Field(
-#     #     input_processor=MapCompose(parse_location),
-#     #     output_processor=TakeFirst()
-#     # )
-#     # author_bio = Field(
-#     #     input_processor=MapCompose(str.strip),
-#     #     output_processor=TakeFirst()
-#     #     )
-#     # tags = Field(
-#     #     input_processor=MapCompose(remove_space),
-#     #     # TakeFirst return the first value not the whole list
-#     #     output_processor=TakeFirst()
-#     #     )
-#     tags = Field()
-
+class BBCArtItem(Item):
+    published_date = Field(
+        input_processor=MapCompose(parse_utc_dt),
+        output_processor=TakeFirst()
+        )
+    headline = Field(
+        input_processor=MapCompose(extract_headline),
+        output_processor=Join()
+        )
+    standfirst = Field(
+        )
+    article_summary = Field(
+        input_processor=MapCompose(extract_headline),
+        output_processor=Join()
+        )
+    image_caption = Field(
+        input_processor=MapCompose(remove_articles),
+        output_processor=Join()
+        )
+    article_content = Field(
+        input_processor=MapCompose(remove_articles, strip_bbc_h2),
+        output_processor=Join()
+        )
+    article_footnote = Field(
+        input_processor=MapCompose(remove_articles),
+        output_processor=Join()
+        )
+    article_link = Field(
+        input_processor=MapCompose(str.strip), # add_bbc_domain
+        output_processor=TakeFirst()
+        )
+    authors = Field(
+        input_processor=Identity()
+        )
+    tags = Field()

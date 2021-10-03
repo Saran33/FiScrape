@@ -1,0 +1,12 @@
+
+Check for JS: in cchrome dev > Network mode, then from dropdown, click "Slow 3G."
+Reset it if the page is rendering JS. (or just close dev to rset it)
+F1 for settings > Debugger > disable JS.
+Reload page with dev open.
+
+scrapy shell "https://www.fnlondon.com/search/bitcoin"
+
+snippets = response.css('#root > div > div > div > div:nth-child(5) > div > article:nth-child(1)')
+response.css('span::text')
+
+

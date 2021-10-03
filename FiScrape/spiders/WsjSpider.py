@@ -1,12 +1,12 @@
 
-import scrapy
-from scrapy.loader import ItemLoader
-from FiScrape.items import FT_ArticleItem, convert_ft_dt, InsiderArticleItem, convert_bi_dt, strp_dt #, FT_AuthorItem, AuthorItemLoader
-from datetime import date, datetime,timedelta
-from pytz import timezone
-from dateutil import parser
-from scrapy.selector import Selector
-from FiScrape.search import query, start_date
+# import scrapy
+# from scrapy.loader import ItemLoader
+# from FiScrape.items import FtArtItem, convert_ft_dt, InsiderArtItem, convert_bi_dt, strp_dt, AuthorItemLoader
+# from datetime import date, datetime,timedelta
+# from pytz import timezone
+# from dateutil import parser
+# from scrapy.selector import Selector
+# from FiScrape.search import query, start_date
 
 # class WSJ_Spider(scrapy.Spider):
 #     '''

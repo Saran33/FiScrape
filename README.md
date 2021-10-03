@@ -19,6 +19,37 @@ The repository can be found at:
 or
 `git clone https://github.com/Saran33/FiScrape.git`
 
+### Dependencies
+FiScrape requires [Docker](https://docs.docker.com/desktop/) and [Splash](https://splash.readthedocs.io/en/stable/install.html) to scrape some websites that render in Javascript.
+1. Download Docker at the above link.
+2. As per the above Splash installation docs, pull the splash image with:
+ `$ sudo docker pull scrapinghub/splash` for Linux 
+ or `$ docker pull scrapinghub/splash` for OS X.
+ 3. Start the container:
+`$ sudo docker run -it -p 8050:8050 --rm scrapinghub/splash` (Linux)
+(Splash is now available at 0.0.0.0 at port 8050 (http).)
+or `$ docker run -it -p 8050:8050 --rm scrapinghub/splash` (OS X)
+(Splash is available at 0.0.0.0 address at port 8050 (http).)
+- Alternatively, use the Docker desktop app. Splash is found in the 'images' tab. Hover over it, click 'run'. In additional settings, name the container 'splash', and select a port such as 8050. Click 'run.' 
+- In a broweser, enter localhost:8050 (or whatever port you choose) and you should see Splash.
+
+- The other dependencies will be automatically be installed and you can run FiScrape as normal.
+### To run FiScrape:
+#### To scrape all sites:
+1. Navigate to the outer directory of FiScrape.
+2. Open a terminal and run:
+```zsh
+python3 fiscrape.py 
+```
+3. You will be prompted to enter a search term and the earliest publish date from which to download.
+#### To scrape a specific site:
+1. Navigate to the outer directory of FiScrape.
+2. Open a terminal and run, for example, for the Financial Times:
+```zsh
+scrapy crawl ft
+```
+3. You will be prompted to enter a search term and the earliest publish date from which to download.
+
 ### To scrape the full HTML of a page:
 Perform this test step in order to inspect a list of URLs, to see if they render in Javascript, or to simply scrape the raw HTML.
 Save a csv file with a list of URLs. The column should be called 'URL' or 'url.'
