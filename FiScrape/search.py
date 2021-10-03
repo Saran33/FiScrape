@@ -7,7 +7,7 @@ today = todays_date.strftime("%B %-d, %Y")
 
 # Input
 import sys
-if 'test' not in sys.argv[1]:
+if 'test' not in sys.argv:
     query = input('Enter a search term: ').replace(' ', '+')
     if query == 'b':
         query = 'bitcoin'

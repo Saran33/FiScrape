@@ -46,6 +46,18 @@ $ docker run -it -p 8050:8050 --rm scrapinghub/splash
 - In a broweser, enter `localhost:8050` (or whatever port you choose), and you should see Splash is working.
 
 - The other dependencies will be automatically installed and you can run FiScrape as normal.
+=======
+ `$ sudo docker pull scrapinghub/splash` for Linux 
+ or `$ docker pull scrapinghub/splash` for OS X.
+ 3. Start the container:
+`$ sudo docker run -it -p 8050:8050 --rm scrapinghub/splash` (Linux)
+(Splash is now available at 0.0.0.0 at port 8050 (http).)
+or `$ docker run -it -p 8050:8050 --rm scrapinghub/splash` (OS X)
+(Splash is available at 0.0.0.0 address at port 8050 (http).)
+- Alternatively, use the Docker desktop app. Splash is found in the 'images' tab. Hover over it, click 'run'. In additional settings, name the container 'splash', and select a port such as 8050. Click 'run.' 
+- In a broweser, enter localhost:8050 (or whatever port you choose) and you should see Splash.
+- The other dependencies will be automatically be installed and you can run FiScrape as normal.
+
 ### To run FiScrape:
 #### To scrape all sites:
 1. Navigate to the outer directory of FiScrape.
