@@ -24,7 +24,7 @@ setup(
   #'pwe @ git+https://github.com/Saran33/pwe_analysis.git',
         'pandas','numpy', 'pytz', 'Scrapy>=1.7.3', 'SQLAlchemy>=1.3.6',
         'scrapy-splash', 'grequests', 'beautifulsoup4', 'python-dateutil',
-        'pytz',
+        'pytz', 'tzlocal',
 ],
 	#package_dir={"": "src"},
     #packages=find_packages(where="pwe"),

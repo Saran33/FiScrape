@@ -78,6 +78,8 @@ class SaveArticlesPipeline(object):
         if "article_footnote" in item:
             article.footnote = item["article_footnote"]
         article.article_link = item["article_link"]
+        if "origin_link" in item:
+            article.origin_link = item["origin_link"]
 
         topic = Topic(name=query.capitalize())
         # Check whether the topic already exists in the database
