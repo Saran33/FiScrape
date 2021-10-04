@@ -16,6 +16,7 @@ NEWSPIDER_MODULE = 'FiScrape.spiders'
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'FiScrape (+http://www.yourdomain.com)'
 USER_AGENT = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
+
 # Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36
 
 # Obey robots.txt rules
@@ -49,12 +50,24 @@ ROBOTSTXT_OBEY = False
 #SPIDER_MIDDLEWARES = {
 #    'FiScrape.middlewares.FiScrapeSpiderMiddleware': 543,
 #}
+SPIDER_MIDDLEWARES = {
+    'scrapy_splash.SplashDeduplicateArgsMiddleware': 100,
+}
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #DOWNLOADER_MIDDLEWARES = {
 #    'FiScrape.middlewares.FiScrapeDownloaderMiddleware': 543,
 #}
+DOWNLOADER_MIDDLEWARES = {
+    'scrapy_splash.SplashCookiesMiddleware': 723,
+    'scrapy_splash.SplashMiddleware': 725,
+    'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
+}
+
+DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
+
+HTTPCACHE_STORAGE = 'scrapy_splash.SplashAwareFSCacheStorage'
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
@@ -73,6 +86,9 @@ ITEM_PIPELINES = {
 }
 
 CONNECTION_STRING = 'sqlite:///FiScrape.db'
+
+# SPLASH_URL = 'http://192.168.59.103:8050'
+SPLASH_URL = 'http://localhost:8050'
 
 # # MySQL
 # CONNECTION_STRING = "{drivername}://{user}:{passwd}@{host}:{port}/{db_name}?charset=utf8".format(

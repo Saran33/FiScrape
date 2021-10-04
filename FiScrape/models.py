@@ -59,6 +59,7 @@ class Article(Base):
     content = Column('content', Text(), default=None)
     footnote = Column('footnote', Text(), default=None)
     article_link = Column('article_link', Text())
+    origin_link = Column('origin_link', Text())
     source_id = Column(Integer, ForeignKey('source.id')) # , nullable=False)  # Many articles to one source
     #source = relationship('Source', backref='articles', nullable=False)
     authors = relationship('Author', secondary='authors_association',
