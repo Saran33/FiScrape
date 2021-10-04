@@ -12,7 +12,7 @@ Additionally, features may be further segmented by author.
 Generated features can be stored locally as CSV or in a database using SQLAlchemy. The scraper can be set to run periodically.
 
 The repository can be found at:
-[Github-News_Scrape](https://github.com/Saran33/FiScrape/)
+[Github-FiScrape](https://github.com/Saran33/FiScrape/)
 
 #### To install from git:
 `pip install git+git://github.com/Saran33/FiScrape.git`
@@ -27,7 +27,7 @@ FiScrape requires [Docker](https://docs.docker.com/desktop/) and [Splash](https:
 ```zsh
 $ sudo docker pull scrapinghub/splash
 ```
-##### OS X:
+##### OS X / Windows Shell:
 ```zsh
 $ docker pull scrapinghub/splash
 ```
@@ -37,12 +37,12 @@ $ docker pull scrapinghub/splash
 $ sudo docker run -it -p 8050:8050 --rm scrapinghub/splash
 ```
 (Splash is now available at 0.0.0.0 at port 8050 (http))
-##### OS X:
+##### OS X / Windows Shell:
 ```zsh
 $ docker run -it -p 8050:8050 --rm scrapinghub/splash
 ```
 (Splash is available at 0.0.0.0 address at port 8050 (http))
-- Alternatively, use the Docker desktop app. Splash is found under the 'images' tab. Hover over it, click 'run'. In additional settings, name the container 'splash', and select a port such as 8050. Click 'run.' 
+- Alternatively, use the Docker desktop app. Splash is found under the 'images' tab. Hover over it, click 'run'. In additional settings, name the container 'splash', and select a port such as 8050. Click 'run' and switch on the container before running scrapy. Switch it off after.
 - In a broweser, enter `localhost:8050` (or whatever port you choose), and you should see Splash is working.
 
 - The other dependencies will be automatically installed and you can run FiScrape as normal.
