@@ -43,7 +43,7 @@ $ docker run -it -p 8050:8050 --rm scrapinghub/splash
 ```
 (Splash is available at 0.0.0.0 address at port 8050 (http))
 - Alternatively, use the Docker desktop app. Splash is found under the 'images' tab. Hover over it, click 'run'. In additional settings, name the container 'splash', and select a port such as 8050. Click 'run' and switch on the container before running scrapy. Switch it off after.
-- In a broweser, enter `localhost:8050` (or whatever port you choose), and you should see Splash is working.
+- In a browser, enter `localhost:8050` (or whatever port you choose), and you should see Splash is working.
 
 - The other dependencies will be automatically installed and you can run FiScrape as normal.
 =======
