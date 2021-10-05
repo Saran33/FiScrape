@@ -1,7 +1,7 @@
 import scrapy
 from scrapy.loader import ItemLoader
 from FiScrape.items import ZhArtItem, \
-    parse_to_utc, parse_to_os_tz, bleach_html
+    parse_to_os_tz
 from FiScrape.search import query, start_date
 from scrapy_splash import SplashRequest, SplashFormRequest
 from itertools import count
