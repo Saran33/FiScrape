@@ -16,6 +16,7 @@ from tzlocal import get_localzone
 from dateutil import parser
 from unicodedata import normalize
 import re
+import bleach
 
 def strp_dt(text):
     """
@@ -94,11 +95,10 @@ def remove_articles(text):
 
 def remove_space(text):
     # strip the unicode articles
-    text = text.replace('  ', ' ')
+    return text.replace('  ', ' ').strip()
     # .lstrip()
     # .rstrip()
     # For X- path, you can also use: normalize-space
-    return text
 
 def extract_headline(text):
     #text = "".join(text)
@@ -108,7 +108,7 @@ def extract_headline(text):
 
 def extract_standfirst(text):
     #text =  "".join(text)
-    text = text.replace('\n\t\t\t\t\t\t\n\t\t\t\t\t\t', ' ').replace('...“', '').replace('”...', '.').replace('...', '').replace('.', '. ').replace(',', ', ').replace('  ', ' ').replace('   ', ' ')
+    text = text.replace('\n\t\t\t\t\t\t\n\t\t\t\t\t\t', ' ').replace('”...', '...').replace('.', '. ').replace(',', ', ').replace('  ', ' ').replace('   ', ' ')
     #text = text.strip(u'\u201c'u'\u201d')
     return text
 
@@ -197,6 +197,21 @@ def parse_location(text):
 def strip_bbc_h2(text):
     return  text.replace(' class="ssrcss-1s5ma9r-StyledHeading e1fj1fc10"', '').replace('class="ssrcss-1s5ma9r-StyledHeading e1fj1fc10', '').replace(
         ' class="ssrcss-1s5ma9r-StyledHeading ', '').replace('e1fj1fc10"', '')
+
+def strp_class(text):
+    """Strips the class attribute from HTML tags."""
+    cl_at = re.search(r"[a-zA-Z0-9:;\.\s\(\)\-\,]*", text).group(1)
+    return text.replace(cl_at, '')
+
+def bleach_html(text):
+    tags = ['p', 'li', 'strong', 'b', 'em', 'u', 'i', 'mark', 's', 'sub', 'br', 'blockquote', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'small']
+    attrs = [None]
+    text = bleach.clean(text, tags=tags, attributes=attrs, strip=True)
+    text = text.replace('<p></p>', '').replace('<p> </p>', '').replace('<p> </p>', '').replace('<strong></strong>', '').replace('<em></em>', '')
+    return [text]
+
+
+# Article Items:
 
 class TestItem(Item):
     Field(
@@ -371,7 +386,11 @@ class ZhArtItem(Item):
         input_processor=MapCompose(extract_headline),
         output_processor=Join()
         )
+    # standfirst = Field(
+    #     )
     standfirst = Field(
+        input_processor=Compose(remove_articles),
+        output_processor=Identity()
         )
     article_summary = Field(
         input_processor=MapCompose(extract_headline),
@@ -382,7 +401,7 @@ class ZhArtItem(Item):
         output_processor=Join()
         )
     article_content = Field(
-        input_processor=MapCompose(remove_articles),
+        input_processor=MapCompose(bleach_html, remove_articles, remove_space),
         output_processor=Join()
         )
     article_footnote = Field(

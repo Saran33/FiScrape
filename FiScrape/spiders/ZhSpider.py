@@ -1,10 +1,11 @@
 import scrapy
 from scrapy.loader import ItemLoader
 from FiScrape.items import ZhArtItem, \
-    parse_to_utc, parse_to_os_tz
+    parse_to_utc, parse_to_os_tz, bleach_html
 from FiScrape.search import query, start_date
-from scrapy_splash import SplashRequest
+from scrapy_splash import SplashRequest, SplashFormRequest
 from itertools import count
+from ln_meta_template  import zh_user, zh_pass
 
 class ZhSpider(scrapy.Spider):
     '''
@@ -15,10 +16,13 @@ class ZhSpider(scrapy.Spider):
     allowed_domains = ['zerohedge.com']
     # domain_name ='https://www.zerohedge.com'
     query = query
+    zh_user = zh_user
+    zh_pass = zh_pass
+    pages_to_check = 20  # This variable sets the depth of pages to crawl, if not logged in. ZH does not sort seach results by date, unless logged in.
     url = f"https://www.zerohedge.com/search-content?qTitleBody={query}&page=0"
     # url = f'http://localhost:8050/render.html?url=https://www.zerohedge.com/search-content?qTitleBody={query}&page=0'
 
-    script="""
+    next_script="""
     function main(splash, args)
         assert(splash:go(args.url))
         splash:wait((args.wait))
@@ -28,9 +32,43 @@ class ZhSpider(scrapy.Spider):
     end
     """
 
+    login_script = f"""
+    function main(splash)
+        local url = splash.args.url
+        assert(splash:go(url))
+        splash:wait((args.wait))
+
+        splash:set_viewport_full()
+
+        local search_input = splash:select('input[name=username]')   
+        search_input:send_text("{zh_user}"")
+        local search_input = splash:select('input[name=password]')
+        search_input:send_text("{zh_pass}"")
+        splash:wait((args.wait))
+        local submit_button = splash:select('input[class^=BlockLogin_formSubmit__2kXfE]')
+        submit_button:click()
+
+        splash:wait((args.wait))
+
+        return splash:html()
+      end
+    """
+
     def start_requests(self):
         # for url in self.start_urls:
         yield SplashRequest(self.url, callback=self.parse, args={'wait': 5})
+
+    # def start_requests(self):
+    #     return SplashFormRequest.from_response(self.url, callback=self.after_login, endpoint='execute',
+    #     args={'lua_source': self.login_script, 'wait': 5})
+    #             # 'ua': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36"})
+
+    def after_login(self,response):
+        """ This is a test function to see if login is successful."""
+        print('BODY START: '+response.body+' BODY END.')
+        ### Going to film list ######
+        if "Username" in response.body:
+            self.logger.error("##Successful Login##")
 
     def parse(self, response):
         self.logger.info('Parse function called on {}'.format(response.url))
@@ -43,11 +81,19 @@ class ZhSpider(scrapy.Spider):
                 if snippet_date >= start_date:
                     loader = ItemLoader(item=ZhArtItem(), selector=snippet)
                     loader.add_xpath('headline', './/a/text()')
-                    loader.add_xpath('standfirst', './/div[3]//text()')
-                    loader.add_xpath('tags', './/div[@class="tout-tag d-lg-flex"]/a/text()')
+                    div_a = snippet.xpath('.//div[contains(@class,"SearchResult_authorInfo__33M2f")]//text()').getall()
+                    div_3 = snippet.xpath('.//div[3]//text()').getall()
+                    if div_a == div_3:
+                        standfirst = snippet.xpath('.//div[4]//text()').getall()
+                    else:
+                        standfirst = div_3
+                    if standfirst:
+                        loader.add_value('standfirst', standfirst)
+                    tags = snippet.css('div.SearchResult_category__3FL2h::text, div.tout-tag.d-lg-flex > a::text').getall()
+                    if tags:
+                        loader.add_value('tags', tags)
                     article_url = snippet.xpath('.//a/@href').get()
                     loader.add_value('article_link', article_url)
-                    # go to the article page and pass the current collected article info
                     # self.logger.info('Get article page url')
                     article_item = loader.load_item()
                     request = response.follow(article_url, self.parse_article, meta={'article_item': article_item})
@@ -64,19 +110,17 @@ class ZhSpider(scrapy.Spider):
         #     # Go to next search page
         #     for a in response.css('button.SimplePaginator_next__15okP').get():
         #         if a:
-        #             yield SplashRequest(response.url, callback=self.parse, endpoint='execute', args={'lua_source': self.script, 'wait': 5}, dont_filter=True)
+        #             yield SplashRequest(response.url, callback=self.parse, endpoint='execute', args={'lua_source': self.next_script, 'wait': 5}, dont_filter=True)
 
-        # a= 0
-        # while True:
-        #     for a in count(1):
-        #         if response:
-        #             if a < 3:
-        #                 url = f"https://www.zerohedge.com/search-content?qTitleBody={self.query}&page={a}"
-        #                 yield SplashRequest(url=url, callback=self.parse)
-        #             else:
-        #                 break
-        #         else:
-        #             break
+        for a in count(1):
+            if a <= self.pages_to_check: # This number represents the depth of pages to crawl. ZH do not sort seach results by date unless logged in.
+                if response:
+                    url = f"https://www.zerohedge.com/search-content?qTitleBody={self.query}&page={a}"
+                    yield SplashRequest(url=url, callback=self.parse)
+                else:
+                    break
+            else:
+                break
 
     def parse_article(self, response):
         article_item = response.meta['article_item']
@@ -113,21 +157,24 @@ class ZhSpider(scrapy.Spider):
             '//article/div[3]/div[1]/ul[1]/li/p/text() | //article/div[3]/div[1]/ul[1]/li/p/a/text() | //article/div[3]/div[1]/ul[1]/li/p/strong | //article/div[3]/div[1]/ul[1]/li/p/em').getall()
         if article_summary:
             loader.add_value('article_summary', article_summary)
-        image_caption = response.xpath('.//figcaption/text()').getall()
-        if image_caption:
-            loader.add_value('image_caption', image_caption)
         body = response.css('div.NodeContent_body__2clki.NodeBody_container__1M6aJ')
         if body:
-            article_content = body.css(
-                'p > strong, p > a::text, li > p::text, li > p > a::text, li > p > strong, li > p > em, li > p > span::text, p > u, h1, h2, h3, h4, h5, p::text').getall()
+            # article_content = body.css(
+            #     'p > strong, p > a::text, li > p::text, li > p > a::text, li > p > strong, li > p > em, li > p > span::text, p > u, h1, h2, h3, h4, h5, p::text').getall()
+            article_content = response.css('div.NodeContent_body__2clki.NodeBody_container__1M6aJ').getall()
         if article_content:
-            article_content = [x for x in article_content if x not in article_summary]
-            article_content = [x for x in article_content if authors not in x]
-            article_content = [x for x in article_content if '<strong>Summary </strong>' not in x]
+            # article_content = [x for x in article_content if x not in article_summary]
+            # article_content = [x for x in article_content if authors not in x]
+            # article_content = [x for x in article_content if '<strong>Summary </strong>' not in x]
             loader.add_value('article_content', article_content)
+        if body:
+            image_caption = body.xpath('.//figcaption/text()').getall()
+        else:
+            image_caption = response.xpath('//figcaption/text()').getall()
+        if image_caption:
+            loader.add_value('image_caption', image_caption)
         article_footnote = response.css('div.read-original ::text').getall()
         if article_footnote:
             loader.add_value('article_footnote', article_footnote)
         yield loader.load_item()
-
 

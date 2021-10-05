@@ -4,6 +4,7 @@ html_url = 'https://www.zerohedge.com/search-content?qTitleBody=bitcoin&page=0'
 fetch(html_url)
 
 js_url = 'http://localhost:8050/render.html?url=https://www.zerohedge.com/search-content?qTitleBody=bitcoin&page=0'
+js_url  = 'http://localhost:8050/render.html?url=https://www.zerohedge.com/search-content?qTitleBody=bitcoin&page=2'
 
 fetch(js_url)
 
@@ -21,6 +22,11 @@ import time
 %timeit snippets = response.css('div.SearchResult_container__BnK-I')
 %timeit 
 snippets = response.xpath('//*/div[@class="SearchResult_container__BnK-I"]')
+
+for snippet in snippets:
+    tags = snippet.css('div.SearchResult_category__3FL2h::text, div.tout-tag.d-lg-flex > a::text').getall()
+    print (tags)
+
 
 snippets.xpath('.//*[@class="SearchResult_authorInfo__33M2f"]/span[2]/text()').get()
 %timeit published_date = snippets.xpath('//*[@class="SearchResult_authorInfo__33M2f"]/span[2]/text()').get()
@@ -72,6 +78,15 @@ if dt <= start_date:
 %timeit standfirst = snippets[0].css('div:nth-of-type(3) ::text').getall()
 %timeit standfirst = snippets[0].xpath('.//div[3]//text()').getall()
 
+for snippet in snippets:
+    div_a = snippet.xpath('.//div[contains(@class,"SearchResult_authorInfo__33M2f")]//text()').getall()
+    div_3 = snippet.xpath('.//div[3]//text()').getall()
+    if div_a == div_3:
+        standfirst = snippet.xpath('.//div[4]//text()').getall()
+    else:
+        standfirst = div_3
+    print (standfirst)
+
 
 article_url = snippets.xpath('.//a/@href').get()
 
@@ -113,6 +128,10 @@ url = 'http://localhost:8050/render.html?url=https://www.zerohedge.com/markets/c
 url = 'http://localhost:8050/render.html?url=https://www.zerohedge.com/markets/tales-cobras-windows-and-economic-promise-part-2'
 scrapy shell --nolog
 url = 'http://localhost:8050/render.html?url=https://www.zerohedge.com/markets/european-summit-concludes-full-summary'
+
+url = 'http://localhost:8050/render.html?url=https://www.zerohedge.com/news/2021-03-06/ethereum-fixes-bitcoin'
+url = 'http://localhost:8050/render.html?url=https://www.zerohedge.com/news/2021-09-03/bitcoin-oil-nat-gas-gold-technical-overview-moor-analytics'
+url = 'http://localhost:8050/render.html?url=https://www.zerohedge.com/news/2021-09-14/nat-gas-gold-and-bitcoin-technical-overview-moor-analytics'
 fetch(url)
 
 %timeit published_date = response.xpath('//article/header/footer/div[2]/text()').get()
@@ -155,21 +174,35 @@ article_summary = response.xpath('//article/div[3]/div[1]/ul[1]/li/p/text() | //
 body = response.css('div.NodeContent_body__2clki.NodeBody_container__1M6aJ')
 article_content = body.css('p > strong, p > a::text, li > p::text, li > p > a::text, li > p > strong, li > p > em, li > p > span::text, p > u, h1, h2, h3, h4, h5, p::text').getall()
 
+#For bleach::
+article_content = response.css('div.NodeContent_body__2clki.NodeBody_container__1M6aJ :not(href)').getall()
+article_content = response.css('div.NodeContent_body__2clki.NodeBody_container__1M6aJ').getall()
 
+or
+"NodeContent_body__2clki NodeBody_container__1M6aJ"
 
-for element in article_content:
-    if (author_name in element) or (element in article_summary) or ('<strong>Summary </strong>' in element):
-        article_content.remove(element)
-article_content
+import bleach
+def bleach_html(text):
+    tags = ['p', 'li', 'strong', 'b', 'em', 'u', 'i', 'mark', 's', 'sub', 'br', 'blockquote', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'small']
+    attrs = [None]
+    return [bleach.clean(text, tags=tags, attributes=attrs, strip=True)]
 
-for element in article_content:
-    if element in article_summary:
-        article_content.remove(element)
-    if author_name in element:
-        article_content.remove(element)
-    if '<strong>Summary </strong>' in element:
-        article_content.remove(element)
-article_content
+from unicodedata import normalize
+def remove_articles(text):
+    # strip the unicode articles
+    #text = normalize("NFKD", text.strip(u'\u201c'u'\u201d'))
+    text = normalize("NFKD", ''.join(map(str, text)).replace('  ', ' ').strip())
+    return text
+
+for line in article_content:
+    clean_content = bleach_html(line)
+clean_content
+
+for line in clean_content:
+    content = remove_articles(line)
+content = content.replace('  ', ' ').strip()
+content
+
 
 article_content = [x for x in article_content if x not in article_summary]
 article_content = [x for x in article_content if author_name not in x]
@@ -274,3 +307,22 @@ req = SplashRequest(url,
                     endpoint = 'execute',
                     args = {'lua_source': script})
 fetch(req)
+
+
+article_content = response.xpath('//div[@class="NodeContent_body__2clki NodeBody_container__1M6aJ"][not(parent::div/@class="Advert_tablet__3QEBr")]').getall()
+article_content = response.xpath('//div[@class="NodeContent_body__2clki NodeBody_container__1M6aJ"][not(parent::div[contains(@class,"Advert")])]').getall()
+article_content = response.xpath('//div[@class="NodeContent_body__2clki NodeBody_container__1M6aJ"][not(contains(@class,"Advert_tablet__3QEBr Advert_placement__1I4yb Advert_align__N0_fw"))]').getall()
+article_content = response.xpath('//div[@class="NodeContent_body__2clki NodeBody_container__1M6aJ" and not(div[contains(@class,"Advert_tablet__3QEBr Advert_placement__1I4yb Advert_align__N0_fw")])]').getall()
+
+body = response.xpath('//div[@class="NodeContent_body__2clki NodeBody_container__1M6aJ" and not(div[contains(@class,"Advert_tablet__3QEBr Advert_placement__1I4yb Advert_align__N0_fw")])]')
+article_content = body.xpath('.//*[not(ancestor-or-self::*[@class="Advert_tablet__3QEBr Advert_placement__1I4yb Advert_align__N0_fw"])]').getall()
+
+article_content = response.xpath('//div[@class="NodeContent_body__2clki NodeBody_container__1M6aJ"]').getall()
+article_content = response.xpath('//div[@class="NodeContent_body__2clki NodeBody_container__1M6aJ"][not(ancestor::div/@class="Advert_tablet__3QEBr Advert_placement__1I4yb Advert_align__N0_fw")]').getall()
+
+[not(ancestor::div/@class='infobox')]')
+
+//*[not(ancestor-or-self::*[@condition="cond2"])] 
+a[contains(@href,"twitter")] 
+a[not(contains(@href,"twitter"))]
+[not(parent::div/@class='infobox')]
