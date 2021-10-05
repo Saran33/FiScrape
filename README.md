@@ -73,6 +73,16 @@ python3 fiscrape.py
 scrapy crawl ft
 ```
 3. You will be prompted to enter a search term and the earliest publish date from which to download.
+4. The default settings save the articles to a local SQLite database (which can be changed in settings.py). The DB can be read via SQL queries such as:
+```zsh
+sqlite3 FiScrape.db
+.tables
+.schema article
+.schema sentiment
+select * from article limit 3;
+.quit
+```
+Alternatively, the DB can be opened in the convenient [DB Browser for SQLite](https://sqlitebrowser.org/).
 
 ### To scrape the full HTML of a page:
 Perform this test step in order to inspect a list of URLs, to see if they render in Javascript, or to simply scrape the raw HTML.

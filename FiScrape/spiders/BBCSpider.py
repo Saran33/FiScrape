@@ -18,30 +18,30 @@ class BBCSpider(scrapy.Spider):
     def parse(self, response):
         self.logger.info('Parse function called on {}'.format(response.url))
         article_snippets = response.xpath('//*/ul[@class="ssrcss-v19xcd-Stack e1y4nx260"]/li')
+        
 
         for snippet in article_snippets:
             snippet_date = snippet.xpath('.//*[@class="ssrcss-8d0yke-MetadataStripItem e1ojgjhb1"][1]/dd/span/text()').get()
             if snippet_date:
-                snippet_date = time_ago_str(snippet_date)
-                if snippet_date >= start_date:
-                    loader = ItemLoader(item=BBCArtItem(), selector=snippet)
-                    # loader.add_css('published_date', 'div.tout-tag.d-lg-flex span::text')
-                    loader.add_css('headline', 'a > span > p > span::text')
-                    loader.add_xpath('standfirst', './/p/text()')
-                    loader.add_css('tags', 'div > dl > div:nth-child(2) > dd > span ::text, div > dl > div:nth-child(3) > dd > span ::text')
-                    article_url = snippet.css('a::attr(href)').get()
-                    loader.add_value('article_link', article_url)
-                    # go to the article page and pass the current collected article info
-                    # self.logger.info('Get article page url')
-                    article_item = loader.load_item()
-                    request = response.follow(article_url, self.parse_article, meta={'article_item': article_item})
-                    request.meta['article_item'] = article_item
-                    if request:
-                        yield request
-                    else:
-                        yield article_item
-            else:
-                pass
+                if snippet_date:
+                    snippet_date = time_ago_str(snippet_date)
+                    if snippet_date >= start_date:
+                        loader = ItemLoader(item=BBCArtItem(), selector=snippet)
+                        # loader.add_css('published_date', 'div.tout-tag.d-lg-flex span::text')
+                        loader.add_css('headline', 'a > span > p > span::text')
+                        loader.add_xpath('standfirst', './/p/text()')
+                        loader.add_css('tags', 'div > dl > div:nth-child(2) > dd > span ::text, div > dl > div:nth-child(3) > dd > span ::text')
+                        article_url = snippet.css('a::attr(href)').get()
+                        loader.add_value('article_link', article_url)
+                        # go to the article page and pass the current collected article info
+                        # self.logger.info('Get article page url')
+                        article_item = loader.load_item()
+                        request = response.follow(article_url, self.parse_article, meta={'article_item': article_item})
+                        request.meta['article_item'] = article_item
+                        if request:
+                            yield request
+                        else:
+                            yield article_item
 
         next_pages = response.xpath('//*[@class="ssrcss-i7uuy0-Cluster e1ihwmse1"]/ol//a/@href').getall()
         yield from response.follow_all(next_pages, callback=self.parse)

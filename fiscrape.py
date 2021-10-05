@@ -30,9 +30,11 @@ process.start()
 
 
 # # OR via shell script:
+
 # scrapy runspider ft &
-# scrapy runspider insider  &
-# scrapy runspider bbc
+# scrapy runspider insider &
+# scrapy runspider bbc &
+# scrapy runspider zh
 
 # chmod +x script_name
 
