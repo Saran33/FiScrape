@@ -20,14 +20,14 @@ or
 `git clone https://github.com/Saran33/FiScrape.git`
 
 ### Dependencies
-FiScrape requires [Docker](https://docs.docker.com/desktop/) and [Splash](https://splash.readthedocs.io/en/stable/install.html) to scrape some websites that render in Javascript.
-1. Download Docker at the above link.
+FiScrape requires [Docker](https://docs.docker.com/desktop/), [Splash](https://splash.readthedocs.io/en/stable/install.html) and [Aquarium](https://github.com/TeamHG-Memex/aquarium) to scrape some websites that render in Javascript.
+1. After pip installing FiScrape, download Docker at the above link.
 2. As per the above Splash installation docs, pull the splash image with:
 ##### Linux:
 ```zsh
 $ sudo docker pull scrapinghub/splash
 ```
-##### OS X / Windows Shell:
+##### OS X / Windows:
 ```zsh
 $ docker pull scrapinghub/splash
 ```
@@ -37,26 +37,45 @@ $ docker pull scrapinghub/splash
 $ sudo docker run -it -p 8050:8050 --rm scrapinghub/splash
 ```
 (Splash is now available at 0.0.0.0 at port 8050 (http))
-##### OS X / Windows Shell:
+##### OS X / Windows:
 ```zsh
 $ docker run -it -p 8050:8050 --rm scrapinghub/splash
 ```
 (Splash is available at 0.0.0.0 address at port 8050 (http))
 - Alternatively, use the Docker desktop app. Splash is found under the 'images' tab. Hover over it, click 'run'. In additional settings, name the container 'splash', and select a port such as 8050. Click 'run' and switch on the container before running scrapy. Switch it off after.
-- In a broweser, enter `localhost:8050` (or whatever port you choose), and you should see Splash is working.
+- In a browser, enter `localhost:8050` (or whatever port you choose), and you should see Splash is working.
 
 - The other dependencies will be automatically installed and you can run FiScrape as normal.
 =======
  `$ sudo docker pull scrapinghub/splash` for Linux 
  or `$ docker pull scrapinghub/splash` for OS X.
- 3. Start the container:
-`$ sudo docker run -it -p 8050:8050 --rm scrapinghub/splash` (Linux)
+ 3. Aquarium creates multiple Splash instances behind a HAProxy, in order to load balance parallel scrapy requests to a splash docker cluster. The instances collaborate to render a specific website. It may be necessary for preventing 504 errors (timeout) on some sites. It also speeds up the scraping of Javascript pages, and can also facilitate Tor proxies. To install Aquarium, navigate to your home directory and run the command:
+ ```zsh
+ cookiecutter gh:TeamHG-Memex/aquarium
+ ```
+ Choose default settings, set user and password, set Tor to 0.
+ 
+ 4. a. To start the container (without Acquarium):
+ ##### Linux:
+`$ sudo docker run -it --restart always -p 8050:8050 scrapinghub/splash` (Linux)
 (Splash is now available at 0.0.0.0 at port 8050 (http).)
-or `$ docker run -it -p 8050:8050 --rm scrapinghub/splash` (OS X)
+##### OS X / Windows:
+or `$ docker run -it --restart always -p 8050:8050 scrapinghub/splash` (OS X)
 (Splash is available at 0.0.0.0 address at port 8050 (http).)
 - Alternatively, use the Docker desktop app. Splash is found in the 'images' tab. Hover over it, click 'run'. In additional settings, name the container 'splash', and select a port such as 8050. Click 'run.' 
 - In a broweser, enter localhost:8050 (or whatever port you choose) and you should see Splash.
 - The other dependencies will be automatically be installed and you can run FiScrape as normal.
+
+4. b. Or to start the Splash cluster with Acquarium:
+ Go to the new acquarium folder and start the Splash cluster:
+ ```zsh
+ cd ./aquarium
+docker-compose up
+ ```
+In browswer, visit the below link to view Splash is working:
+http://localhost:8050/
+To see the stats of the cluster:
+http://localhost:8036/
 
 ### To run FiScrape:
 #### To scrape all sites:
