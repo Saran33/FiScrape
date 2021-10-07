@@ -66,6 +66,7 @@ or `$ docker run -it --restart always -p 8050:8050 scrapinghub/splash` (OS X)
 - The other dependencies will be automatically be installed and you can run FiScrape as normal.
 
 4. b. Or to start the Splash cluster with Aquarium:
+
  Go to the new acquarium folder and start the Splash cluster:
  ```zsh
  cd ./aquarium
