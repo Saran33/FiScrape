@@ -46,7 +46,6 @@ $ docker run -it -p 8050:8050 --rm scrapinghub/splash
 - In a browser, enter `localhost:8050` (or whatever port you choose), and you should see Splash is working.
 
 - The other dependencies will be automatically installed and you can run FiScrape as normal.
-=======
  `$ sudo docker pull scrapinghub/splash` for Linux 
  or `$ docker pull scrapinghub/splash` for OS X.
  3. Aquarium creates multiple Splash instances behind a HAProxy, in order to load balance parallel scrapy requests to a splash docker cluster. The instances collaborate to render a specific website. It may be necessary for preventing 504 errors (timeout) on some sites. It also speeds up the scraping of Javascript pages, and can also facilitate Tor proxies. To install Aquarium, navigate to your home directory and run the command:
@@ -66,13 +65,13 @@ or `$ docker run -it --restart always -p 8050:8050 scrapinghub/splash` (OS X)
 - In a broweser, enter localhost:8050 (or whatever port you choose) and you should see Splash.
 - The other dependencies will be automatically be installed and you can run FiScrape as normal.
 
-4. b. Or to start the Splash cluster with Acquarium:
+4. b. Or to start the Splash cluster with Aquarium:
  Go to the new acquarium folder and start the Splash cluster:
  ```zsh
  cd ./aquarium
 docker-compose up
  ```
-In browswer, visit the below link to view Splash is working:
+In a browser window, visit the below link to view Splash is working:
 http://localhost:8050/
 To see the stats of the cluster:
 http://localhost:8036/
@@ -84,14 +83,14 @@ http://localhost:8036/
 ```zsh
 python3 fiscrape.py 
 ```
-3. You will be prompted to enter a search term and the earliest publish date from which to download.
+3. You will be prompted to enter a search term and the earliest publish date from which to scrape.
 #### To scrape a specific site:
 1. Navigate to the outer directory of FiScrape.
 2. Open a terminal and run, for example, for the Financial Times:
 ```zsh
 scrapy crawl ft
 ```
-3. You will be prompted to enter a search term and the earliest publish date from which to download.
+3. You will be prompted to enter a search term. e.g. ```Bitcoin```. You will then be prompted to enter the earliest date from which to scrape. e.g ```2021-01-15```. You can also enter ```t``` for today, ```yd``` for yesterday, ```w``` for the past week, ```m``` for month, or ```y``` for the start of the current year. For the matching articles returned from the query, each headline, standfirst (referring to the snippet on the site's search page), summary, image caption, content body, footnote, author name, author position, author bio, author email, author twitter, are returned to a database.
 4. The default settings save the articles to a local SQLite database (which can be changed in settings.py). The DB can be read via SQL queries such as:
 ```zsh
 sqlite3 FiScrape.db
@@ -102,6 +101,10 @@ select * from article limit 3;
 .quit
 ```
 Alternatively, the DB can be opened in the convenient [DB Browser for SQLite](https://sqlitebrowser.org/).
+To save the scraped data to a CSV as well as the DB, run:
+```zsh
+scrapy crawl ft -o output.csv -t csv
+```
 
 ### To scrape the full HTML of a page:
 Perform this test step in order to inspect a list of URLs, to see if they render in Javascript, or to simply scrape the raw HTML.
@@ -118,22 +121,8 @@ or if you don't want to see the log:
 scrapy crawl test --nolog
 ```
 
-### To scrape a News site:
-Open a shell in the top level FiScrape dir. Enter the following command. 
-e.g. ft is the spider name for the Financial Times:
-```zsh
-scrapy crawl ft 
-```
-You will be prompted to enter a search term. e.g. ```Bitcoin```
-You will be prompted to enter the oldest date from which to scrape. e.g ```2021-01-15```
-You can also enter ```t``` for today, ```yd``` for yesterday, ```w``` for the past week, or ```y``` for the start of the current year.
-For the matching articles returned from the query, each headline, standfirst (referring to the snippet on the site's search page), summary, image caption, content body, footnote, author name, author position, author bio, author email, author twitter, are returned to a database.
-The default setting is to create a local SQLite DB file.
-Alternatively, to save the scraped data to a CSV as well as the DB, run:
-```zsh
-scrapy crawl ft -o output.csv -t csv
-```
-Additionally, the scraper will return sentiment scores for each article's combined headline and standfirst, as well as seperate sentiment scores for the article's body. These sentiment scores will be stored in the database.
+### Sentiment Analysis
+Additionally, FiScrape will return sentiment scores for each article's combined headline and standfirst, as well as seperate sentiment scores for the article's body. These sentiment scores will be stored in the database.
 The default sentiment analysis pipeline calculates the following sentiment scores:
 
 TextBlob (TextBlob is a Python Library based on the Natural Language ToolKit (NLTK)):
