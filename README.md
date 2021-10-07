@@ -101,7 +101,8 @@ select * from article limit 3;
 .quit
 ```
 Alternatively, the DB can be opened in the convenient [DB Browser for SQLite](https://sqlitebrowser.org/).
-\nTo save the scraped data to a CSV as well as the DB, run:
+
+To save the scraped data to a CSV as well as the DB, run:
 ```zsh
 scrapy crawl ft -o output.csv -t csv
 ```
