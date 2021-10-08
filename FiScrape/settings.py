@@ -86,7 +86,7 @@ ITEM_PIPELINES = {
    # 'FiScrape.pipelines.SentimentPipeline': 400,
 }
 
-CONNECTION_STRING = 'sqlite:///FiScrape.db'
+CONNECTION_STRING = 'sqlite:///sqlite_files/FiScrape.db'
 
 # SPLASH_URL = 'http://192.168.59.103:8050'
 SPLASH_URL = 'http://localhost:8050'
