@@ -1,5 +1,5 @@
 # FiScrape
-![alt text](https://github.com/[PWE-Capital]/[FiScrape]/images/PWE_FiScrape_splash.png?raw=true)
+![alt text](https://github.com/PWE-Capital/FiScrape/blob/Branch36/images/PWE_FiScrape_splash.png?raw=true)
 ### Financial news scraping and processing for machine learning. 
 `FiScrape` is a package for scraping financial news and applying natural langage processing for sentiment analysis. It leverages `scrapy`.
 
