@@ -18,10 +18,25 @@ class ZhSpider(scrapy.Spider):
     query = query
     zh_user = zh_user
     zh_pass = zh_pass
-    pages_to_check = 20  # This variable sets the depth of pages to crawl, if not logged in. ZH does not sort seach results by date, unless logged in.
+    pages_to_check = 10  # This variable sets the depth of pages to crawl, if not logged in. ZH does not sort seach results by date, unless logged in.
     url = f"https://www.zerohedge.com/search-content?qTitleBody={query}&page=0"
     # url = f'http://localhost:8050/render.html?url=https://www.zerohedge.com/search-content?qTitleBody={query}&page=0'
 
+    script="""
+    function main(splash, args)
+        splash:on_request(function(request)
+            if request.url:find('css') then
+                request.abort()
+            end
+        end)
+        splash.images_enabled = false
+        assert(splash:go(args.url))
+        splash:wait((args.wait))
+        splash:select('button.SimplePaginator_next__15okP'):mouse_click()
+        splash:wait((args.wait))
+        return splash:html()
+    end
+    """
     next_script="""
     function main(splash, args)
         assert(splash:go(args.url))
@@ -56,7 +71,7 @@ class ZhSpider(scrapy.Spider):
 
     def start_requests(self):
         # for url in self.start_urls:
-        yield SplashRequest(self.url, callback=self.parse, args={'wait': 5})
+        yield SplashRequest(self.url, callback=self.parse, args={'wait': 5, 'lua_source': self.script})
 
     # def start_requests(self):
     #     return SplashFormRequest.from_response(self.url, callback=self.after_login, endpoint='execute',

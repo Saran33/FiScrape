@@ -1,5 +1,5 @@
 # FiScrape
-
+![alt text](https://github.com/[PWE-Capital]/[FiScrape]/images/PWE_FiScrape_splash.png?raw=true)
 ### Financial news scraping and processing for machine learning. 
 `FiScrape` is a package for scraping financial news and applying natural langage processing for sentiment analysis. It leverages `scrapy`.
 
@@ -83,6 +83,10 @@ http://localhost:8036/
 2. Open a terminal and run:
 ```zsh
 python3 fiscrape.py 
+```
+Or to open the FiScrape GUI:
+```zsh
+python3 fiscrape_gui.py
 ```
 3. You will be prompted to enter a search term and the earliest publish date from which to scrape.
 #### To scrape a specific site:

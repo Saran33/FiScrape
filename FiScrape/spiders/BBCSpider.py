@@ -23,8 +23,8 @@ class BBCSpider(scrapy.Spider):
         for snippet in article_snippets:
             snippet_date = snippet.xpath('.//*[@class="ssrcss-8d0yke-MetadataStripItem e1ojgjhb1"][1]/dd/span/text()').get()
             if snippet_date:
+                snippet_date = time_ago_str(snippet_date)
                 if snippet_date:
-                    snippet_date = time_ago_str(snippet_date)
                     if snippet_date >= start_date:
                         loader = ItemLoader(item=BBCArtItem(), selector=snippet)
                         # loader.add_css('published_date', 'div.tout-tag.d-lg-flex span::text')
