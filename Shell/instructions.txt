@@ -33,6 +33,9 @@ function main(splash, args)
 end
 
 https://github.com/TeamHG-Memex/aquarium
+cd /Users/zenman618/
+cookiecutter gh:Saran33/aquarium
+
 cd /Users/zenman618/aquarium
 docker-compose up
 

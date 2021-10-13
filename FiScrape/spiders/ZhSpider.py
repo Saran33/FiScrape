@@ -18,6 +18,8 @@ class ZhSpider(scrapy.Spider):
     query = query
     zh_user = zh_user
     zh_pass = zh_pass
+    http_user = 'user'
+    http_pass = 'userpass'
     pages_to_check = 10  # This variable sets the depth of pages to crawl, if not logged in. ZH does not sort seach results by date, unless logged in.
     url = f"https://www.zerohedge.com/search-content?qTitleBody={query}&page=0"
     # url = f'http://localhost:8050/render.html?url=https://www.zerohedge.com/search-content?qTitleBody={query}&page=0'

@@ -4,10 +4,6 @@ from FiScrape.items import FtArtItem, convert_ft_dt
 from FiScrape.search import query, start_date
 from unicodedata import normalize
 from bs4 import BeautifulSoup
-# import random
-# from scrapy.selector import Selector
-# from scrapy.http import Request
-# import requests as rq
 import grequests
 
 # from ln_meta import ft_user,ft_pass,wsj_user,wsj_pass
