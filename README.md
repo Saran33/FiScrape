@@ -52,7 +52,7 @@ $ docker run -it -p 8050:8050 --rm scrapinghub/splash
  ```zsh
  cookiecutter gh:Saran33/aquarium
  ```
- Choose default settings, set user and password, set Tor to 0.
+ Choose default settings or whatever suits, splash_version: latest, set user and password, set Tor to 0.
  
  4. a. To start the container (without Acquarium):
  ##### Linux:
