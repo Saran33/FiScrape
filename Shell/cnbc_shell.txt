@@ -1,0 +1,535 @@
+html_url = 'https://www.cnbc.com/search/?query=Bitcoin&qsearchterm=Bitcoin'
+
+article_url = "https://www.cnbc.com/2021/10/13/cryptocurrencies-could-lead-to-financial-instability-author-warns.html"
+
+scrapy shell --nolog
+
+fetch(article_url)
+
+docker run -it -p 8050:8050 scrapinghub/splash --disable-private-mode --dns 8.8.8.8
+splash.private_mode_enabled = False
+
+scrapy shell --nolog
+js_url  = 'http://localhost:8050/render.html?url=https://www.cnbc.com/2021/10/13/cryptocurrencies-could-lead-to-financial-instability-author-warns.html'
+fetch(js_url)
+
+http_user = 'user'
+http_pass = 'userpass'
+
+####### 13/10/21
+
+sort_script="""
+function main(splash, args)
+    splash:on_request(function(request)
+        if request.url:find('css') then
+            request.abort()
+        end
+    end)
+    splash.images_enabled = false
+    assert(splash:go(args.url))
+    splash:wait((args.wait))
+    splash:select('button.SearchResults-searchResultsSort'):mouse_click()
+    splash:wait((args.wait))
+    return splash:html()
+end
+"""
+
+goog_bot = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
+mac = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.71 Safari/537.36'
+
+from scrapy_splash import SplashRequest
+
+url = "https://www.cnbc.com/2021/10/13/cryptocurrencies-could-lead-to-financial-instability-author-warns.html"
+
+req = SplashRequest(url,
+                    endpoint = 'execute',
+                    args = {'lua_source': sort_script, 'wait': 5.0})
+fetch(req)
+
+response.css('html').get()
+
+###############
+
+sort_script="""
+function main(splash, args)
+    splash.private_mode_enabled = False
+    assert(splash:go(args.url))
+    splash:wait((args.wait))
+    splash:select('button.SearchResults-searchResultsSort'):mouse_click()
+    splash:wait((args.wait))
+    return splash:html()
+end
+"""
+
+sort_script="""
+function main(splash)
+    splash.private_mode_enabled = False
+    assert(splash:go('https://www.cnbc.com/search/?query=Bitcoin&qsearchterm=Bitcoin'))
+    splash:wait(5.0)
+    
+    splash:wait(5.0)
+    return splash:html()
+end
+"""
+
+
+script = """
+    function main(splash, args)
+        splash.private_mode_enabled = False
+        splash:init_cookies(splash.args.cookies)
+        assert(splash:go{
+        splash.args.url,
+        headers=splash.args.headers,
+        http_method=splash.args.http_method,
+        body=splash.args.body,
+        })
+        assert(splash:wait(15))
+
+        local entries = splash:history()
+        local last_response = entries[#entries].response
+        return {
+        url = splash:url(),
+        headers = last_response.headers,
+        http_status = last_response.status,
+        cookies = splash:get_cookies(),
+        html = splash:html(),
+        }
+    end
+"""
+https://stackoverflow.com/questions/46058568/scrapy-splash-not-rendering-full-page-javascript-data
+
+script = """
+    function main(splash, args)
+        splash.private_mode_enabled = False
+        local num_scrolls = 10
+        local scroll_delay = 2.0
+        splash:set_viewport_size(1980, 8020)
+        local scroll_to = splash:jsfunc("window.scrollTo")
+        local get_body_height = splash:jsfunc(
+            "function() {return document.body.scrollHeight;}"
+        )
+        assert(splash:go(splash.args.url))
+    --    splash:set_viewport_full()
+        splash:wait(10)
+    --    splash:runjs("jQuery('span.icon-x').click();")
+        splash:wait(1)
+        for _ = 1, num_scrolls do
+            scroll_to(0, get_body_height())
+            splash:wait(scroll_delay)
+        end      
+
+        splash:wait(30)
+
+        return { 
+            html = splash:html(),
+            har = splash:har()
+        }
+    end
+"""
+
+function main(splash, args)
+    splash:set_user_agent('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)')
+    splash.private_mode_enabled = False
+    local num_scrolls = 10
+    local scroll_delay = 2.0
+    splash:set_viewport_size(1980, 8020)
+    local scroll_to = splash:jsfunc("window.scrollTo")
+    local get_body_height = splash:jsfunc(
+        "function() {return document.body.scrollHeight;}"
+    )
+    assert(splash:go(splash.args.url))
+--    splash:set_viewport_full()
+    splash:wait(10)
+--    splash:runjs("jQuery('span.icon-x').click();")
+    splash:wait(1)
+    for _ = 1, num_scrolls do
+        scroll_to(0, get_body_height())
+        splash:wait(scroll_delay)
+    end      
+
+    splash:wait(30)
+
+    return { 
+        html = splash:html(),
+        png = splash:png(),
+        har = splash:har()
+    }
+end
+
+goog_bot = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
+mac = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.71 Safari/537.36'
+
+from scrapy_splash import SplashRequest
+
+url = 'https://www.cnbc.com/search/?query=Bitcoin&qsearchterm=Bitcoin'
+
+req =  SplashRequest(url, 
+    endpoint='execute',
+    cache_args=['lua_source'],
+    args={
+        'lua_source': script,
+        'wait': 10,
+        'headers': {'User-Agent': 'Mozilla/5.0'}
+    },
+)
+fetch(req)
+
+script = """
+function main(splash, args)
+  splash:set_user_agent('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)')
+  splash.private_mode_enabled = False
+  splash:set_viewport_full()
+  splash:go{url=args.url}
+  assert(splash:wait(1))
+  return {
+    html = splash:html(),
+    png = splash:png(),
+    har = splash:har(),
+  }
+end
+"""
+
+req = SplashRequest(url,
+                    endpoint = 'execute',
+                    args = {'lua_source': script, 'wait': 5.0})
+fetch(req)
+
+response.css('html').get()
+response.css('head ::text').getall()
+response.xpath('//*[@id="searchcontainer"]')
+
+import time
+snippets = response.xpath('//div[@class="SearchResult-searchResult SearchResult-standardVariant"]').get()
+
+snippets = response.xpath('//*[@id="searchcontainer"]/div[1]/div')
+response.css('head')
+
+
+
+
+
+
+
+
+
+
+
+TEST::
+snippets = response.xpath('//*/div[@class="SearchResult_container__BnK-I"]')
+for snippet in snippets:
+    foo = snippet.xpath('.//div[@class="SearchResult_authorInfo__33M2f"]//text()').extract()
+    print (foo)
+
+response.css('title::text').get()
+response.css('h4::text').getall()
+
+import time
+%timeit snippets = response.css('div.SearchResult_container__BnK-I')
+%timeit 
+snippets = response.xpath('//*/div[@class="SearchResult_container__BnK-I"]')
+
+for snippet in snippets:
+    tags = snippet.css('div.SearchResult_category__3FL2h::text, div.tout-tag.d-lg-flex > a::text').getall()
+    print (tags)
+
+
+snippets.xpath('.//*[@class="SearchResult_authorInfo__33M2f"]/span[2]/text()').get()
+%timeit published_date = snippets.xpath('//*[@class="SearchResult_authorInfo__33M2f"]/span[2]/text()').get()
+%timeit published_date = snippets.xpath('//div[@class="SearchResult_authorInfo__33M2f"]/span[2]/text()').get()
+
+snippets = response.xpath('//*/div[@class="SearchResult_container__BnK-I"]')
+for snippet in snippets:
+    published_date = snippet.xpath('.//div[@class="SearchResult_authorInfo__33M2f"]/span[2]/text()').extract()
+    print (published_date)
+
+from dateutil import parser
+from pytz import timezone
+from tzlocal import get_localzone
+tz = get_localzone()
+for snippet in snippets:
+    published_date = snippet.xpath('.//div[@class="SearchResult_authorInfo__33M2f"]/span[2]/text()').get()
+    print (published_date)
+    dt = parser.parse(published_date)
+    dt = timezone(tz.key).localize(dt)
+    print (dt)
+
+from dateutil import parser
+from pytz import timezone
+from tzlocal import get_localzone
+def parse_to_os_tz(text):
+    tz = get_localzone()
+    dt = parser.parse(text)
+    dt = timezone(tz.key).localize(dt)
+    return dt
+for snippet in snippets:
+    published_date = snippet.xpath('.//div[@class="SearchResult_authorInfo__33M2f"]/span[2]/text()').get()
+    published_date = parse_to_os_tz(published_date)
+    print (published_date)
+
+from datetime import datetime
+start_date =  datetime.utcnow()
+start_date = timezone("UTC").localize(start_date)
+
+if dt <= start_date:
+    print ("yes")
+
+
+%timeit headline = snippets.css('div.SearchResult_title__2OME_ > a::text').get()
+%timeit headline = snippets.xpath('//*[@class="SearchResult_title__2OME_"]/a/text()').get()
+%timeit headline = snippets.xpath('//div[@class="SearchResult_title__2OME_"]/a/text()').get()
+%timeit headline = snippets.css('a::text').get()
+%timeit headline = snippets.xpath('.//a/text()').get()
+
+%timeit standfirst = snippets[0].css('div:nth-of-type(3) ::text').getall()
+%timeit standfirst = snippets[0].xpath('.//div[3]//text()').getall()
+
+for snippet in snippets:
+    div_a = snippet.xpath('.//div[contains(@class,"SearchResult_authorInfo__33M2f")]//text()').getall()
+    div_3 = snippet.xpath('.//div[3]//text()').getall()
+    if div_a == div_3:
+        standfirst = snippet.xpath('.//div[4]//text()').getall()
+    else:
+        standfirst = div_3
+    print (standfirst)
+
+
+article_url = snippets.xpath('.//a/@href').get()
+
+
+########## Final shell script: ############
+scrapy shell --nolog
+
+from scrapy_splash import SplashRequest
+url ='https://www.zerohedge.com/search-content?qTitleBody=bitcoin&page=0'
+script="""
+function main(splash, args)
+    assert(splash:go(args.url))
+    splash:wait((args.wait))
+    splash:select('button.SimplePaginator_next__15okP'):mouse_click()
+    splash:wait((args.wait))
+    return splash:html()
+end
+"""
+req = SplashRequest(url,
+                    endpoint = 'execute',
+                    args = {'lua_source': script, 'wait': 5.0})
+fetch(req)
+p2_headline = response.xpath('//*/div[@class="SearchResult_title__2OME_"]/a/text()').getall()
+p2_headline
+
+####################  End  #################
+
+
+
+#################### Article page::
+scrapy shell --nolog
+url = 'http://localhost:8050/render.html?url=https://www.zerohedge.com/news/2020-06-22/outlook-property-bitcoin-cryptos-and-gold-zombie-economy-part-ii'
+url = 'http://localhost:8050/render.html?url=https://www.zerohedge.com/crypto/three-iranian-power-plants-will-soon-be-mining-bitcoin'
+url = 'http://localhost:8050/render.html?url=https://www.zerohedge.com/crypto/five-reasons-sec-should-approve-bitcoin-etfs'
+url = 'http://localhost:8050/render.html?url=https://www.zerohedge.com/crypto/five-reasons-sec-should-approve-bitcoin-etfs'
+url = 'http://localhost:8050/render.html?url=https://www.zerohedge.com/markets/big-trade-hidden-under-surface'
+url = 'http://localhost:8050/render.html?url=https://www.zerohedge.com/political/how-democray-ends'
+url = 'http://localhost:8050/render.html?url=https://www.zerohedge.com/markets/complete-summary-hedge-fund-performance-sentiment-and-positioning'
+url = 'http://localhost:8050/render.html?url=https://www.zerohedge.com/markets/tales-cobras-windows-and-economic-promise-part-2'
+scrapy shell --nolog
+url = 'http://localhost:8050/render.html?url=https://www.zerohedge.com/markets/european-summit-concludes-full-summary'
+
+url = 'http://localhost:8050/render.html?url=https://www.zerohedge.com/news/2021-03-06/ethereum-fixes-bitcoin'
+url = 'http://localhost:8050/render.html?url=https://www.zerohedge.com/news/2021-09-03/bitcoin-oil-nat-gas-gold-technical-overview-moor-analytics'
+url = 'http://localhost:8050/render.html?url=https://www.zerohedge.com/news/2021-09-14/nat-gas-gold-and-bitcoin-technical-overview-moor-analytics'
+fetch(url)
+
+%timeit published_date = response.xpath('//article/header/footer/div[2]/text()').get()
+%timeit published_date = response.xpath('//header/footer/div[2]/text()').getall()
+
+from dateutil import parser
+from pytz import timezone
+def parse_to_utc(text):
+    return timezone("UTC").localize(parser.parse(text))
+print(parse_to_utc(published_date))
+
+
+%timeit
+author_name = response.xpath('//article/div[3]/div[1]/p[1]/a/em/text()').get()
+if author_name:
+    author_name = author_name.replace('Authored by ', '')
+    origin_link = response.xpath('//*[@id="__next"]/div/div[5]/main/article/div[3]/div[1]/p[1]/a/@href').get()
+elif not author_name:
+    author_name = response.xpath('//div[@class="ContributorArticleFull_headerFooter__author__2NXEq"]/text()[2]').get()
+    if not author_name:
+        author_name = response.xpath('//*[@id="__next"]/div/div[5]/main/article/header/footer/div[1]/div/text()').get()
+        if author_name:
+            author_name = author_name.replace('by ', '')
+author_name
+
+author_twitter = response.xpath('//*[@id="__next"]/div/div[5]/main/article/div[3]/div[1]/p[105]/em/a[1]/@href').get()
+author_twitter = response.xpath('//a[contains(@href,"twitter")]').getall()
+author_twitter = response.xpath('//em/a[contains(@href,"twitter")]/@href')[-1].get()
+
+author_twitter = response.xpath('//p[last()]/em/a[contains(@href,"twitter")]/@href').get()
+twitter_handle = response.xpath('//p[last()]/em/a[contains(@href,"twitter")]/text()').get()
+
+import time
+%timeit article_summary = response.xpath('//article/div[3]/div[1]/ul[1]/li//text()').getall()
+%timeit article_summary = response.xpath('//article/div[3]/div[1]/ul[1]/text() | //article/div[3]/div[1]/ul[1]/strong | //article/div[3]/div[1]/ul[1]/em').getall()
+%timeit 
+article_summary = response.xpath('//article/div[3]/div[1]/ul[1]/li/p/text() | //article/div[3]/div[1]/ul[1]/li/p/a/text() | //article/div[3]/div[1]/ul[1]/li/p/strong | //article/div[3]/div[1]/ul[1]/li/p/em').getall()
+
+
+body = response.css('div.NodeContent_body__2clki.NodeBody_container__1M6aJ')
+article_content = body.css('p > strong, p > a::text, li > p::text, li > p > a::text, li > p > strong, li > p > em, li > p > span::text, p > u, h1, h2, h3, h4, h5, p::text').getall()
+
+#For bleach::
+article_content = response.css('div.NodeContent_body__2clki.NodeBody_container__1M6aJ :not(href)').getall()
+article_content = response.css('div.NodeContent_body__2clki.NodeBody_container__1M6aJ').getall()
+
+or
+"NodeContent_body__2clki NodeBody_container__1M6aJ"
+
+import bleach
+def bleach_html(text):
+    tags = ['p', 'li', 'strong', 'b', 'em', 'u', 'i', 'mark', 's', 'sub', 'br', 'blockquote', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'small']
+    attrs = [None]
+    return [bleach.clean(text, tags=tags, attributes=attrs, strip=True)]
+
+from unicodedata import normalize
+def remove_articles(text):
+    # strip the unicode articles
+    #text = normalize("NFKD", text.strip(u'\u201c'u'\u201d'))
+    text = normalize("NFKD", ''.join(map(str, text)).replace('  ', ' ').strip())
+    return text
+
+for line in article_content:
+    clean_content = bleach_html(line)
+clean_content
+
+for line in clean_content:
+    content = remove_articles(line)
+content = content.replace('  ', ' ').strip()
+content
+
+
+article_content = [x for x in article_content if x not in article_summary]
+article_content = [x for x in article_content if author_name not in x]
+article_content = [x for x in article_content if '<strong>Summary </strong>' not in x]
+article_content
+
+response.xpath
+article_content = response.xpath(')
+
+
+
+
+
+# ZH comments are local tz, articles are UTC.
+comments = response.xpath('talk-slot-stream').get()
+comment_date = response.xpath('//*[@class="CommentTimestamp__timestamp___2Ejbf talk-comment-timestamp TimeAgo__timeago___3aHze talk-comment-timeago"]/text()').get()
+
+
+
+
+
+## Work sheet:
+
+script = """
+function main(splash, args)
+    assert(splash:go(args.url))
+    splash:select('button.SimplePaginator_next__15okP'):mouse_click()
+    splash:wait(5.0) 
+    return splash:html()
+end
+"""
+
+script="""
+function main(splash)
+    splash:wait(5)
+    splash:runjs('document.querySelector("button.SimplePaginator_next__15okP").submit()')
+    splash:wait(5)
+    return {
+        html = splash:html(),
+    }
+end
+"""
+
+script="""
+function main(splash)
+    assert(splash:go("https://www.zerohedge.com/search-content?qTitleBody=bitcoin&page=0"))
+    splash:wait(5)
+    splash:runjs('document.querySelector("button.SimplePaginator_next__15okP").submit()')
+    splash:wait(5)
+    return {
+        html = splash:html(),
+    }
+end
+"""
+
+script="""
+function main(splash)
+    assert(splash:go("https://www.zerohedge.com/search-content?qTitleBody=bitcoin&page=0"))
+    splash:wait(5.0)
+    splash:select('button.SimplePaginator_next__15okP'):mouse_click()
+    splash:wait(5.0) 
+    return splash:html()
+end
+"""
+
+script = """
+    function main(splash)
+        assert(splash:go(splash.args.url))
+        splash:wait(5)
+        local element = splash:select('#__next > div > div > div.content > main > div > span > div > button')
+        local bounds = element:bounds()
+        element:mouse_click{x=bounds.width/2, y=bounds.height/2}
+        return splash:html()
+    end
+"""
+
+function main(splash)
+    assert(splash:go(splash.args.url))
+    splash:wait(5)
+    local element = splash:select('#__next > div > div > div.content > main > div > span > div > button')
+    local bounds = element:bounds()
+    element:mouse_click{x=bounds.width/2, y=bounds.height/2}
+    return splash:html()
+end
+
+document.querySelector("#__next > div > div > div.content > main > div > span > div > button")
+
+import time
+%timeit next_button = response.css('#__next > div > div > div.content > main > div > span > div > button').get()
+%timeit next_button = response.css('main > div > span > div > button').get()
+
+scrapy shell --nolog
+
+from scrapy_splash import SplashRequest
+url ='https://www.zerohedge.com/search-content?qTitleBody=bitcoin&page=0'
+
+req = SplashRequest(url,
+                    endpoint = 'execute',
+                    args = {'lua_source': script, 'timeout': 5})
+
+req = SplashRequest(url,
+                    endpoint = 'execute',
+                    args = {'lua_source': script})
+fetch(req)
+
+
+article_content = response.xpath('//div[@class="NodeContent_body__2clki NodeBody_container__1M6aJ"][not(parent::div/@class="Advert_tablet__3QEBr")]').getall()
+article_content = response.xpath('//div[@class="NodeContent_body__2clki NodeBody_container__1M6aJ"][not(parent::div[contains(@class,"Advert")])]').getall()
+article_content = response.xpath('//div[@class="NodeContent_body__2clki NodeBody_container__1M6aJ"][not(contains(@class,"Advert_tablet__3QEBr Advert_placement__1I4yb Advert_align__N0_fw"))]').getall()
+article_content = response.xpath('//div[@class="NodeContent_body__2clki NodeBody_container__1M6aJ" and not(div[contains(@class,"Advert_tablet__3QEBr Advert_placement__1I4yb Advert_align__N0_fw")])]').getall()
+
+body = response.xpath('//div[@class="NodeContent_body__2clki NodeBody_container__1M6aJ" and not(div[contains(@class,"Advert_tablet__3QEBr Advert_placement__1I4yb Advert_align__N0_fw")])]')
+article_content = body.xpath('.//*[not(ancestor-or-self::*[@class="Advert_tablet__3QEBr Advert_placement__1I4yb Advert_align__N0_fw"])]').getall()
+
+article_content = response.xpath('//div[@class="NodeContent_body__2clki NodeBody_container__1M6aJ"]').getall()
+article_content = response.xpath('//div[@class="NodeContent_body__2clki NodeBody_container__1M6aJ"][not(ancestor::div/@class="Advert_tablet__3QEBr Advert_placement__1I4yb Advert_align__N0_fw")]').getall()
+
+[not(ancestor::div/@class='infobox')]')
+
+//*[not(ancestor-or-self::*[@condition="cond2"])] 
+a[contains(@href,"twitter")] 
+a[not(contains(@href,"twitter"))]
+[not(parent::div/@class='infobox')
+
+

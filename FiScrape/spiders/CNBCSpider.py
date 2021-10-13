@@ -1,99 +1,71 @@
 import scrapy
 from scrapy.loader import ItemLoader
-from FiScrape.items import ZhArtItem, \
-    parse_to_os_tz
+from FiScrape.items import CNBCArtItem, \
+    parse_dt
 from FiScrape.search import query, start_date
 from scrapy_splash import SplashRequest, SplashFormRequest
 from itertools import count
-from ln_meta_template  import zh_user, zh_pass
+from ..cookies import CNBC_URL, parse_new_cnbc_url
+import json
+import grequests
 
-class ZhSpider(scrapy.Spider):
+class CNBCSpider(scrapy.Spider):
     '''
     Spider for CNBC.
     name :  'cnbc'
     '''
     name = "cnbc"
-    allowed_domains = ['cnbc.com']
+    allowed_domains = ['cnbc.com', 'api.queryly.com']
     # domain_name ='https://www.cnbc.com'
     query = query
     cnbc_user = None
     cnbc_pass = None
+    http_user = 'user'
+    http_pass = 'userpass'
     pages_to_check = 10  # This variable sets the depth of pages to crawl, if not logged in. ZH does not sort seach results by date, unless logged in.
-    url = f"https://www.cnbc.com/search/?query={query}&qsearchterm={query}"
+    # url = f"https://www.cnbc.com/search/?query={query}&qsearchterm={query}"
+    start_urls = [CNBC_URL]
 
-    sort_script="""
-    function main(splash, args)
-        assert(splash:go(args.url))
-        splash:wait((args.wait))
-        splash:select('button.SearchResults-searchResultsSort'):mouse_click()
-        splash:wait((args.wait))
-        return splash:html()
-    end
-    """
-
-    login_script = f"""
-    function main(splash)
-        local url = splash.args.url
-        assert(splash:go(url))
-        splash:wait((args.wait))
-
-        splash:set_viewport_full()
-
-        local search_input = splash:select('input[name=username]')   
-        search_input:send_text("{zh_user}"")
-        local search_input = splash:select('input[name=password]')
-        search_input:send_text("{zh_pass}"")
-        splash:wait((args.wait))
-        local submit_button = splash:select('input[class^=BlockLogin_formSubmit__2kXfE]')
-        submit_button:click()
-
-        splash:wait((args.wait))
-
-        return splash:html()
-      end
-    """
-
-    # def start_requests(self):
-    #     # for url in self.start_urls:
-    #     yield SplashRequest(self.url, callback=self.parse, args={'wait': 5})
+    # def parse(self, response):
+    #     print (response.body)
 
     def start_requests(self):
-        return SplashFormRequest.from_response(self.url, callback=self.after_login, endpoint='execute',
-        args={'lua_source': self.sort_script, 'wait': 5})
-                # 'ua': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36"})
+        yield scrapy.Request(
+            url=CNBC_URL,
+            callback=self.parse,
+            meta={
+                'currentPage': 1
+            }
+        )
 
-    def after_login(self,response):
-        """ This is a test function to see if login is successful."""
-        print('BODY START: '+response.body+' BODY END.')
-        ### Going to film list ######
-        if "Username" in response.body:
-            self.logger.error("##Successful Login##")
+    # def parse(self, response):
+    #     with open('initial_response.json', 'wb') as  f:
+    #         f.write(response.body)
 
     def parse(self, response):
-        self.logger.info('Parse function called on {}'.format(response.url))
-        article_snippets = response.xpath('//*/div[@class="SearchResult_container__BnK-I"]')
-
-        for snippet in article_snippets:
-            snippet_date = snippet.xpath('.//div[@class="SearchResult_authorInfo__33M2f"]/span[2]/text()').get()
+        current_page = response.request.meta['currentPage']
+        json_resp = json.loads(response.body)
+        # print (json_resp)
+        snippets = json_resp.get('results')
+        for snippet in snippets:
+            snippet_date = snippet.get('datePublished')
             if snippet_date:
-                snippet_date = parse_to_os_tz(snippet_date)
+                print("DATE:", snippet_date)
+                snippet_date = parse_dt(snippet_date)
                 if snippet_date >= start_date:
-                    loader = ItemLoader(item=ZhArtItem(), selector=snippet)
-                    loader.add_xpath('headline', './/a/text()')
-                    div_a = snippet.xpath('.//div[contains(@class,"SearchResult_authorInfo__33M2f")]//text()').getall()
-                    div_3 = snippet.xpath('.//div[3]//text()').getall()
-                    if div_a == div_3:
-                        standfirst = snippet.xpath('.//div[4]//text()').getall()
-                    else:
-                        standfirst = div_3
-                    if standfirst:
-                        loader.add_value('standfirst', standfirst)
-                    tags = snippet.css('div.SearchResult_category__3FL2h::text, div.tout-tag.d-lg-flex > a::text').getall()
-                    if tags:
-                        loader.add_value('tags', tags)
-                    article_url = snippet.xpath('.//a/@href').get()
+                    loader = ItemLoader(item=CNBCArtItem())
+                    loader.add_value('published_date', snippet_date)
+                    loader.add_value('headline', snippet.get('cn:title'))
+                    loader.add_value('standfirst', snippet.get('description'))
+                    loader.add_value('article_summary', snippet.get('summary'))
+                    loader.add_value('tags', snippet.get('cn:sectionSubType'))
+                    loader.add_value('tags', snippet.get('cn:keyword'))
+                    loader.add_value('tags', snippet.get('cn:type'))
+                    loader.add_value('tags', snippet.get('section'))
+                    article_url = snippet.get('url')
                     loader.add_value('article_link', article_url)
-                    # self.logger.info('Get article page url')
+                    # yield loader.load_item()
+
                     article_item = loader.load_item()
                     request = response.follow(article_url, self.parse_article, meta={'article_item': article_item})
                     request.meta['article_item'] = article_item
@@ -102,78 +74,87 @@ class ZhSpider(scrapy.Spider):
                     else:
                         yield article_item
 
-
-        # last_date = response.xpath('//div[@class="SearchResult_authorInfo__33M2f"]/span[2]/text()')[-1].extract()
-        # last_date = parse_to_os_tz(last_date)
-        # if last_date >= start_date:
-        #     # Go to next search page
-        #     for a in response.css('button.SimplePaginator_next__15okP').get():
-        #         if a:
-        #             yield SplashRequest(response.url, callback=self.parse, endpoint='execute', args={'lua_source': self.next_script, 'wait': 5}, dont_filter=True)
-
-        for a in count(1):
-            if a <= self.pages_to_check: # This number represents the depth of pages to crawl. ZH do not sort seach results by date unless logged in.
-                if response:
-                    url = f"https://www.zerohedge.com/search-content?qTitleBody={self.query}&page={a}"
-                    yield SplashRequest(url=url, callback=self.parse)
-                else:
-                    break
-            else:
-                break
+        last_date = snippets[9].get('datePublished')
+        last_date = parse_dt(last_date)
+        if last_date >= start_date:
+            total_pages = json_resp.get('metadata').get('totalpage')
+            # print("TOTAL PAGES:", total_pages)
+            if current_page <= total_pages:
+                current_page += 1
+                # print("CURRENT PAGE:", current_page)
+                yield scrapy.Request(
+                    url=parse_new_cnbc_url(CNBC_URL, page_number=current_page),
+                    callback=(self.parse),
+                    meta={
+                        'currentPage': current_page
+                    }
+                )
 
     def parse_article(self, response):
         article_item = response.meta['article_item']
         loader = ItemLoader(item=article_item, response=response)
-        loader.add_xpath('published_date', '//header/footer/div[2]/text()')
         article_item['authors'] = {}
-        authors = response.xpath('//article/div[3]/div[1]/p[1]/a/em/text()').get()
+        authors = response.css("a.n-content-tag--author")
+        bio_links = []
         if authors:
-            authors = authors.replace('Authored by ', '')
-            loader.add_xpath('origin_link', '//*[@id="__next"]/div/div[5]/main/article/div[3]/div[1]/p[1]/a/@href')
-        elif not authors:
-            authors = response.xpath('//div[@class="ContributorArticleFull_headerFooter__author__2NXEq"]/text()[2]').get()
-            if not authors:
-                authors = response.xpath('//*[@id="__next"]/div/div[5]/main/article/header/footer/div[1]/div/text()').get().replace('by ', '')
-                if authors:
-                    authors = authors.replace('by ', '')
-        if authors:
-            author_twitter = response.xpath('//p[last()]/em/a[contains(@href,"twitter")]/@href').get()
-            if author_twitter:
-                twitter_handle = response.xpath('//p[last()]/em/a[contains(@href,"twitter")]/text()').get()
-                auth = twitter_handle
+            for author in authors:
+                auth = author.css("a.n-content-tag--author::text").get()
                 article_item['authors'][f'{auth}'] = {}
-                article_item['authors'][f'{auth}']['author_twitter'] = author_twitter
-            else:
-                auth = authors
-                article_item['authors'][f'{auth}'] = {}
-                article_item['authors'][f'{auth}']['author_twitter'] = None
-            article_item['authors'][f'{auth}']['bio_link'] = None
-            article_item['authors'][f'{auth}']['author_position'] = None
-            article_item['authors'][f'{auth}']['author_bio'] = None
-            article_item['authors'][f'{auth}']['author_email'] = None
+                bio_link = author.css("a.n-content-tag--author::attr(href)").extract()
+                bio_link = response.urljoin(''.join(map(str, bio_link)))
+                article_item['authors'][f'{auth}']['bio_link'] = bio_link
+                bio_links.append(bio_link)
+            resp = self.get_urls(bio_links)
+            self.process_author(article_item, resp)
 
-        article_summary = response.xpath(
-            '//article/div[3]/div[1]/ul[1]/li/p/text() | //article/div[3]/div[1]/ul[1]/li/p/a/text() | //article/div[3]/div[1]/ul[1]/li/p/strong | //article/div[3]/div[1]/ul[1]/li/p/em').getall()
+        article_summary = response.xpath('.//*[@class="o-topper__standfirst"]/text()').get()
         if article_summary:
             loader.add_value('article_summary', article_summary)
-        body = response.css('div.NodeContent_body__2clki.NodeBody_container__1M6aJ')
-        if body:
-            # article_content = body.css(
-            #     'p > strong, p > a::text, li > p::text, li > p > a::text, li > p > strong, li > p > em, li > p > span::text, p > u, h1, h2, h3, h4, h5, p::text').getall()
-            article_content = response.css('div.NodeContent_body__2clki.NodeBody_container__1M6aJ').getall()
-        if article_content:
-            # article_content = [x for x in article_content if x not in article_summary]
-            # article_content = [x for x in article_content if authors not in x]
-            # article_content = [x for x in article_content if '<strong>Summary </strong>' not in x]
-            loader.add_value('article_content', article_content)
-        if body:
-            image_caption = body.xpath('.//figcaption/text()').getall()
-        else:
-            image_caption = response.xpath('//figcaption/text()').getall()
+        image_caption = response.xpath('//*[@id="site-content"]/div[1]/figure/figcaption/text()').getall()
         if image_caption:
             loader.add_value('image_caption', image_caption)
-        article_footnote = response.css('div.read-original ::text').getall()
+        article_content = response.xpath(
+            '//*[contains(@class, "article__content-body n-content-body js-article__content-body")]//text()[not(ancestor::*[@class="n-content-layout__container"])]').getall()
+        if article_content:
+            loader.add_value('article_content', article_content)
+        article_footnote = response.xpath('//*[contains(@class, "article__content-body n-content-body js-article__content-body")]/p[1]/*[self::em or self::a]//text()[not(ancestor::*[@class="n-content-layout__container"])]').getall()
         if article_footnote:
             loader.add_value('article_footnote', article_footnote)
+        article_footnote_2 = response.xpath('.//*[@id="site-content"]/div[3]/div[2]/p[last()-1]/em/text()').get()
+        if article_footnote_2:
+            loader.add_value('article_footnote', article_footnote_2)
         yield loader.load_item()
 
+
+    def get_urls(self, bio_links):
+        reqs = [grequests.get(bio_link) for bio_link in bio_links]
+        resps = grequests.map(reqs)
+        return resps
+
+
+    def process_author(self, article_item, resps):
+        authors = article_item['authors']
+        for (auth, response) in zip(authors.keys(), resps):
+            page_source = BeautifulSoup(response.text, 'lxml')
+            try:
+                pos = page_source.find('div', attrs={'class': "sub-header__strapline"}).text.strip()
+                article_item['authors'][f'{auth}']['author_position'] = pos
+            except:
+                pass
+            try:
+                author_bio = page_source.find('div', attrs={'class': "sub-header__description"}).text
+                author_bio = normalize("NFKD", ''.join(map(str, author_bio)).replace('  ', ' ').strip())
+                article_item['authors'][f'{auth}']['author_bio'] = author_bio
+            except Exception as e:
+                print(f'error getting bio. #{e}')
+            try:
+                article_item['authors'][f'{auth}']['author_email'] = page_source.find('a', attrs={
+                    'data-trackable': 'send-email'})['href'].replace('mailto:', '').strip()
+            except:
+                pass
+            try:
+                article_item['authors'][f'{auth}']['author_twitter'] = page_source.find('a', attrs={
+                    'data-trackable': 'twitter-page'})['href'].strip()
+            except:
+                pass
+        return article_item

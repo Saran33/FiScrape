@@ -9,7 +9,6 @@ from scrapy.item import Item, Field
 #from scrapy.loader.processors import MapCompose, TakeFirst
 from itemloaders.processors import MapCompose, TakeFirst, Compose, Join, Identity
 from itemloaders import ItemLoader
-from dateutil import parser
 from datetime import datetime,timedelta
 from pytz import timezone
 from tzlocal import get_localzone
@@ -183,6 +182,10 @@ def add_bbc_domain(text):
 
 def add_zh_domain(text):
     domain_name ='https://www.zerohedge.com'
+    return f"{domain_name}{text}".strip()
+
+def add_cnbc_domain(text):
+    domain_name ='https://www.cnbc.com'
     return f"{domain_name}{text}".strip()
 
 # def add_domain(text):
@@ -410,6 +413,49 @@ class ZhArtItem(Item):
         )
     article_link = Field(
         input_processor=MapCompose(add_zh_domain),
+        output_processor=TakeFirst()
+        )
+    origin_link = Field(
+        input_processor=MapCompose(str.strip),
+        output_processor=TakeFirst()
+        )
+    authors = Field(
+        input_processor=Identity()
+        )
+    tags = Field()
+
+class CNBCArtItem(Item):
+    published_date = Field(
+        output_processor=TakeFirst()
+        )
+    headline = Field(
+        input_processor=MapCompose(extract_headline),
+        output_processor=Join()
+        )
+    # standfirst = Field(
+    #     )
+    standfirst = Field(
+        input_processor=Compose(remove_articles),
+        output_processor=Identity()
+        )
+    article_summary = Field(
+        input_processor=MapCompose(extract_headline),
+        output_processor=Join()
+        )
+    image_caption = Field(
+        input_processor=MapCompose(remove_articles),
+        output_processor=Join()
+        )
+    article_content = Field(
+        input_processor=MapCompose(bleach_html, remove_articles, remove_space),
+        output_processor=Join()
+        )
+    article_footnote = Field(
+        input_processor=MapCompose(remove_articles),
+        output_processor=Join()
+        )
+    article_link = Field(
+        input_processor=MapCompose(add_cnbc_domain),
         output_processor=TakeFirst()
         )
     origin_link = Field(
