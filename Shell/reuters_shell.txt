@@ -1,0 +1,135 @@
+
+scrapy shell --nolog
+article_url = ""
+fetch(article_url)
+
+api_url = 'https://www.reuters.com/pf/api/v3/content/fetch/articles-by-search-v2?query=%7B%22keyword%22%3A%22Bitcoin%22%2C%22offset%22%3A0%2C%22orderby%22%3A%22display_date%3Adesc%22%2C%22size%22%3A10%2C%22website%22%3A%22reuters%22%7D&d=53&_website=reuters'
+fetch(api_url)
+
+url = 'https://www.reuters.com/pf/api/v3/content/fetch/articles-by-search-v2?query=%7B%22keyword%22%3A%22Bitcoin%22%2C%22offset%22%3A260%2C%22orderby%22%3A%22display_date%3Adesc%22%2C%22size%22%3A10%2C%22website%22%3A%22reuters%22%7D&d=53&_website=reuters'
+fetch(url)
+
+response.css('html').get()
+with open('initial_response.html', 'wb') as  f:
+    f.write(response.body)
+
+import json
+json_resp = json.loads(response.body)
+snippets = json_resp.get('result').get('articles')
+for snippet in snippets:
+    snippet_date = snippet.get('published_time')
+    if snippet_date:
+        print("DATE:", snippet_date)
+
+for snippet in snippets:
+    headline = snippet.get('title')
+    print(headline)
+    standfirst = snippet.get('description')
+    print(standfirst)
+    tags = snippet.get('primary_tag').get('description')
+    print(tags)
+    image_caption = snippet.get('thumbnail').get('caption')
+    print(image_caption)
+    article_url = snippet.get('canonical_url')
+    print(article_url)
+    article_url = response.urljoin(''.join(map(str, article_url)))
+
+for snippet in snippets:
+    try:
+        image_caption = snippet.get('thumbnail').get('caption')
+    except:
+        image_caption = None
+    print(image_caption)
+
+
+for snippet in snippets:
+    authors = snippet.get('authors')
+    print (authors[0])
+    if authors:
+        for author in authors:
+            auth = author.get('name')
+            print (auth)
+
+authors = snippets[9].get('authors')
+for author in authors:
+    social_links = author.get('social_links')
+    for social in social_links:
+        if social.get('site') == 'twitter':
+            author_twitter = social.get('url')
+            print (author_twitter)
+        if social.get('site') == 'linkedin':
+            author_linkedin = social.get('url')
+            print (author_linkedin)
+
+
+author_url = 'https://www.reuters.com/authors/scott-murdoch/'
+fetch(author_url)
+
+article_url = 'https://www.reuters.com/business/wall-st-climbs-after-week-strong-bank-results-market-set-weekly-gains-2021-10-15/'
+fetch(article_url)
+
+response.css('html').get()
+with open('initial_response.html', 'wb') as  f:
+    f.write(response.body)
+
+reut_script="""
+    function main(splash, args)
+    --  splash.private_mode_enabled = false
+    splash:set_user_agent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36')
+    assert(splash:go(args.url))
+    assert(splash:wait(5))
+    --  btn = splash:select('button.RenderBioDetails-bioToggleBtn')
+    --  btn:mouse_click()
+    --  btn.style.border = "1px solid #002f6c"
+    assert(splash:wait(5))
+    return {
+        html = splash:html(),
+        png = splash:png(),
+        har = splash:har(),
+    }
+    end
+"""
+
+function main(splash, args)
+    --  splash.private_mode_enabled = false
+    splash:set_user_agent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36')
+    assert(splash:go(args.url))
+    assert(splash:wait(5))
+    --  btn = splash:select('button.RenderBioDetails-bioToggleBtn')
+    -- splash:runjs('document.getElementsByClassName("RenderBioDetails-bioToggleBtn")[0].click()')
+    -- splash:evaljs('document.querySelector("#div-gpt-boxinline-119696774 > script")')
+    --  btn:mouse_click()
+    --  btn.style.border = "1px solid #002f6c"
+    assert(splash:wait(5))
+    return {
+        html = splash:html(),
+        png = splash:png(),
+        har = splash:har(),
+    }
+end
+
+
+script="""
+function main(splash, args)
+    splash.images_enabled = true
+    splash.js_enabled = false
+    assert(splash:go(args.url))
+    splash:wait((args.wait))
+    -- splash:select('button.SimplePaginator_next__15okP'):mouse_click()
+    -- splash:wait((args.wait))
+    return splash:html()
+end
+"""
+
+function main(splash, args)
+    splash.images_enabled = true
+    assert(splash:go(args.url))
+    splash:wait((args.wait))
+    -- splash:select('button.SimplePaginator_next__15okP'):mouse_click()
+    -- splash:wait((args.wait))
+    return {
+        html = splash:html(),
+        png = splash:png(),
+        har = splash:har(),
+    }
+end

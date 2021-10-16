@@ -1,10 +1,36 @@
-html_url = 'https://www.cnbc.com/search/?query=Bitcoin&qsearchterm=Bitcoin'
-
-article_url = "https://www.cnbc.com/2021/10/13/cryptocurrencies-could-lead-to-financial-instability-author-warns.html"
 
 scrapy shell --nolog
-
+article_url = "https://www.bloomberg.com/news/articles/2021-10-15/day-traders-are-sparking-a-bitcoin-futures-frenzy-on-etf-bets"
 fetch(article_url)
+
+api_url = 'https://www.bloomberg.com/markets2/api/search?query=Bitcoin&page=1&sort=time:desc'
+fetch(api_url)
+
+response.css('html').get()
+with open('initial_response.html', 'wb') as  f:
+    f.write(response.body)
+
+
+script="""
+function main(splash, args)
+    splash:on_request(function(request)
+        if request.url:find('css') then
+            request.abort()
+        end
+    end)
+    splash:set_user_agent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36')
+    splash.private_mode_enabled = True
+    splash.images_enabled = false
+    assert(splash:go(args.url))
+    splash:wait((args.wait))
+    return {
+        html = splash:html(),
+        png = splash:png(),
+        har = splash:har(),
+    }
+end
+"""
+
 
 docker run -it -p 8050:8050 scrapinghub/splash --disable-private-mode --dns 8.8.8.8
 splash.private_mode_enabled = False
@@ -190,7 +216,7 @@ function main(splash, args)
 end
 
 function main(splash, args)
-    splash:set_user_agent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.71 Safari/537.36')
+    splash:set_user_agent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36')
     splash.private_mode_enabled = False
     splash.images_enabled = false
     local num_scrolls = 10

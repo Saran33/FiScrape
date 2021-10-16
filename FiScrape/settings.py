@@ -13,14 +13,15 @@ SPIDER_MODULES = ['FiScrape.spiders']
 NEWSPIDER_MODULE = 'FiScrape.spiders'
 
 FEED_EXPORT_ENCODING='UTF-8'
+# FEED_EXPORT_FIELDS
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = 'FiScrape (+http://www.yourdomain.com)'
 # USER_AGENT = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
 # USER_AGENT = "AdsBot-Google (+http://www.google.com/adsbot.html)"
-USER_AGENT = "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; +http://www.google.com/bot.html) Chrome/W.X.Y.Z Safari/537.36"
 # USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.118 Safari/537.36 (compatible; Google-Read-Aloud; +https://developers.google.com/search/docs/advanced/crawling/overview-google-crawlers)"
-# USER_AGENT =  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.71 Safari/537.36"
+USER_AGENT =  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36"
+# USER_AGENT = "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; +http://www.google.com/bot.html) Chrome/W.X.Y.Z Safari/537.36"
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False

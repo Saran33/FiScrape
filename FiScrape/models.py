@@ -135,8 +135,10 @@ class Author(Base):
     position = Column('position', String(150), default=None)
     bio = Column('bio', Text(), default=None)
     bio_link = Column('bio_link', Text(), default=None)
-    twitter = Column('twitter', String(36), default=None)
     email = Column('email', String(50), default=None)
+    twitter = Column('twitter', String(36), default=None)
+    linkedin = Column('linkedin', String(36), default=None)
+    facebook = Column('facebook', String(36), default=None)
     birthday = Column('birthday', DateTime, default=None)
     bornlocation = Column('bornlocation', String(150), default=None)
     articles = relationship('Article', secondary='authors_association',

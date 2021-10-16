@@ -6,6 +6,7 @@ https://jsonformatter.curiousconcept.com/
 
 
 docker run -it --restart always -p 8050:8050 scrapinghub/splash
+docker run -it -p 8050:8050 scrapinghub/splash
 
 function main(splash, args)
   splash.images_enabled = false

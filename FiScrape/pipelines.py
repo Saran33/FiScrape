@@ -98,30 +98,57 @@ class SaveArticlesPipeline(object):
 
         #check whether the current article has authors or not
         if "authors" in item:
-            for author_name, auth in item["authors"].items():
-                author = Author(name=author_name)
-                # author.name = auth['author_name']
-                if 'author_position' in auth:
-                    author.position = auth['author_position']
-                if "author_bio" in auth:
-                    author.bio = auth["author_bio"]
-                if "bio_link" in auth:
-                    author.bio_link = auth["bio_link"]
-                if "author_twitter" in auth:
-                    author.twitter = auth["author_twitter"]
-                if "author_email" in auth:
-                    author.email = auth["author_email"]
-                if "author_bias" in auth:
-                    author.bias = auth["author_bias"]
-                if "author_birthday" in auth:
-                    author.birthday = auth["author_birthday"]
-                if "author_bornlocation" in auth:
-                    author.bornlocation = auth["author_bornlocation"]
-                # check whether the author exists
-                exist_author = session.query(Author).filter_by(name=author.name).first()
-                if exist_author is not None:  # the current author exists
-                    author = exist_author
-                article.authors.append(author)
+            try:
+                for author_name, auth in item["authors"].items():
+                    author = Author(name=author_name)
+                    # author.name = auth['author_name']
+                    if 'author_position' in auth:
+                        author.position = auth['author_position']
+                    if "author_bio" in auth:
+                        author.bio = auth["author_bio"]
+                    if "bio_link" in auth:
+                        author.bio_link = auth["bio_link"]
+                    if "author_twitter" in auth:
+                        author.twitter = auth["author_twitter"]
+                    if "author_fb" in auth:
+                        author.facebook = auth["author_fb"]
+                    if "author_email" in auth:
+                        author.email = auth["author_email"]
+                    if "author_bias" in auth:
+                        author.bias = auth["author_bias"]
+                    if "author_birthday" in auth:
+                        author.birthday = auth["author_birthday"]
+                    if "author_bornlocation" in auth:
+                        author.bornlocation = auth["author_bornlocation"]
+            except:
+                for a in item["authors"]:
+                    for author_name, auth in a.items():
+                        author = Author(name=author_name)
+                    if 'author_position' in auth:
+                        author.position = auth['author_position']
+                    if "author_bio" in auth:
+                        author.bio = auth["author_bio"]
+                    if "bio_link" in auth:
+                        author.bio_link = auth["bio_link"]
+                    if "author_twitter" in auth:
+                        author.twitter = auth["author_twitter"]
+                    if "author_linkedin" in auth:
+                        author.linkedin = auth["author_linkedin"]
+                    if "author_fb" in auth:
+                        author.facebook = auth["author_fb"]
+                    if "author_email" in auth:
+                        author.email = auth["author_email"]
+                    if "author_bias" in auth:
+                        author.bias = auth["author_bias"]
+                    if "author_birthday" in auth:
+                        author.birthday = auth["author_birthday"]
+                    if "author_bornlocation" in auth:
+                        author.bornlocation = auth["author_bornlocation"]
+            # check whether the author exists
+            exist_author = session.query(Author).filter_by(name=author.name).first()
+            if exist_author is not None:  # the current author exists
+                author = exist_author
+            article.authors.append(author)
 
         # check whether the current article has tags or not
         if "tags" in item:

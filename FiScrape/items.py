@@ -165,6 +165,9 @@ def convert_ft_dt(text):
 def strip_ft_bio(text):
     return text.replace("\n\t\t\t\t\t\t\t\t", '').replace("\n\t\t\t\t\t\t\t", '').strip()
 
+def index_of_nth(longstring, substring, n):
+   return len(substring.join(longstring.split(substring)[: n]))
+
 def remove_mail_to(text):
     return text.replace("mailto:", '').strip()
 
@@ -432,8 +435,6 @@ class CNBCArtItem(Item):
         input_processor=MapCompose(extract_headline),
         output_processor=Join()
         )
-    # standfirst = Field(
-    #     )
     standfirst = Field(
         input_processor=Compose(remove_articles),
         output_processor=Identity()
@@ -455,7 +456,7 @@ class CNBCArtItem(Item):
         output_processor=Join()
         )
     article_link = Field(
-        input_processor=MapCompose(add_cnbc_domain),
+        input_processor=MapCompose(str.strip),
         output_processor=TakeFirst()
         )
     origin_link = Field(
@@ -464,5 +465,45 @@ class CNBCArtItem(Item):
         )
     authors = Field(
         input_processor=Identity()
+        )
+    tags = Field()
+
+class ReutersArtItem(Item):
+    published_date = Field(
+        output_processor=TakeFirst()
+        )
+    headline = Field(
+        input_processor=MapCompose(extract_headline),
+        output_processor=Join()
+        )
+    standfirst = Field(
+        input_processor=Compose(remove_articles),
+        output_processor=Identity()
+        )
+    article_summary = Field(
+        input_processor=MapCompose(extract_headline),
+        output_processor=Join()
+        )
+    image_caption = Field(
+        input_processor=MapCompose(remove_articles),
+        output_processor=Join()
+        )
+    article_content = Field(
+        input_processor=MapCompose(bleach_html, remove_articles, remove_space),
+        output_processor=Join()
+        )
+    article_footnote = Field(
+        input_processor=MapCompose(remove_articles),
+        output_processor=Join()
+        )
+    article_link = Field(
+        input_processor=MapCompose(str.strip),
+        output_processor=TakeFirst()
+        )
+    origin_link = Field(
+        input_processor=MapCompose(str.strip),
+        output_processor=TakeFirst()
+        )
+    authors = Field(input_processor=Identity()
         )
     tags = Field()
