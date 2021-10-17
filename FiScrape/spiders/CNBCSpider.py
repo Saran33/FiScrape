@@ -1,13 +1,14 @@
 import scrapy
 from scrapy.loader import ItemLoader
 from FiScrape.items import CNBCArtItem, \
-    parse_dt
+    parse_dt, index_of_nth
 from FiScrape.search import query, start_date
-from scrapy_splash import SplashRequest, SplashFormRequest
-from itertools import count
 from ..cookies import CNBC_URL, parse_new_cnbc_url
 import json
 import grequests
+from bs4 import BeautifulSoup
+from lxml import etree
+
 
 class CNBCSpider(scrapy.Spider):
     '''
@@ -22,9 +23,27 @@ class CNBCSpider(scrapy.Spider):
     cnbc_pass = None
     http_user = 'user'
     http_pass = 'userpass'
-    pages_to_check = 10  # This variable sets the depth of pages to crawl, if not logged in. ZH does not sort seach results by date, unless logged in.
-    # url = f"https://www.cnbc.com/search/?query={query}&qsearchterm={query}"
     start_urls = [CNBC_URL]
+
+    bio_script="""
+        function main(splash, args)
+        --  splash.private_mode_enabled = false
+        splash:set_user_agent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.71 Safari/537.36')
+        assert(splash:go(args.url))
+        assert(splash:wait(5))
+        --  btn = splash:select('button.RenderBioDetails-bioToggleBtn')
+        splash:runjs('document.getElementsByClassName("RenderBioDetails-bioToggleBtn")[0].click()')
+        splash:evaljs('document.querySelector("#div-gpt-boxinline-119696774 > script")')
+        --  btn:mouse_click()
+        --  btn.style.border = "1px solid #002f6c"
+        assert(splash:wait(5))
+        return {
+            html = splash:html(),
+            png = splash:png(),
+            har = splash:har(),
+        }
+        end
+    """
 
     # def parse(self, response):
     #     print (response.body)
@@ -50,7 +69,7 @@ class CNBCSpider(scrapy.Spider):
         for snippet in snippets:
             snippet_date = snippet.get('datePublished')
             if snippet_date:
-                print("DATE:", snippet_date)
+                # print("DATE:", snippet_date)
                 snippet_date = parse_dt(snippet_date)
                 if snippet_date >= start_date:
                     loader = ItemLoader(item=CNBCArtItem())
@@ -67,7 +86,8 @@ class CNBCSpider(scrapy.Spider):
                     # yield loader.load_item()
 
                     article_item = loader.load_item()
-                    request = response.follow(article_url, self.parse_article, meta={'article_item': article_item})
+                    request = response.follow(article_url, self.parse_article, meta={
+                                              'article_item': article_item})
                     request.meta['article_item'] = article_item
                     if request:
                         yield request
@@ -94,33 +114,46 @@ class CNBCSpider(scrapy.Spider):
         article_item = response.meta['article_item']
         loader = ItemLoader(item=article_item, response=response)
         article_item['authors'] = {}
-        authors = response.css("a.n-content-tag--author")
+        authors = response.xpath('//div[@class="Author-authorNameAndSocial"]')
         bio_links = []
         if authors:
             for author in authors:
-                auth = author.css("a.n-content-tag--author::text").get()
+                auth = author.xpath(
+                    '//div[@class="Author-authorNameAndSocial"]/a[@class="Author-authorName"]/text()').get()
                 article_item['authors'][f'{auth}'] = {}
-                bio_link = author.css("a.n-content-tag--author::attr(href)").extract()
-                bio_link = response.urljoin(''.join(map(str, bio_link)))
-                article_item['authors'][f'{auth}']['bio_link'] = bio_link
+                bio_link = author.xpath(
+                    '//div[@class="Author-authorNameAndSocial"]/a[@class="Author-authorName"]/@href').get()
                 bio_links.append(bio_link)
+                article_item['authors'][f'{auth}']['bio_link'] = bio_link
+                author_twitter = author.xpath(
+                    './/a[@class="Author-authorTwitter"]/@href').get()
+                article_item['authors'][f'{auth}']['author_twitter'] = author_twitter
+            print("BIO_URLS:", bio_links)
             resp = self.get_urls(bio_links)
             self.process_author(article_item, resp)
 
-        article_summary = response.xpath('.//*[@class="o-topper__standfirst"]/text()').get()
+        article_summary = response.xpath(
+            '//div[@class="RenderKeyPoints-list"]//li').getall()
         if article_summary:
             loader.add_value('article_summary', article_summary)
-        image_caption = response.xpath('//*[@id="site-content"]/div[1]/figure/figcaption/text()').getall()
+        image_caption = response.xpath(
+            '//div[@class="InlineImage-imageEmbedCaption"]/text()').get()
         if image_caption:
             loader.add_value('image_caption', image_caption)
         article_content = response.xpath(
-            '//*[contains(@class, "article__content-body n-content-body js-article__content-body")]//text()[not(ancestor::*[@class="n-content-layout__container"])]').getall()
+            '//div[@class="ArticleBody-articleBody"]').getall()
+        img_credit = response.xpath(
+            '//div[@class="InlineImage-imageEmbedCredit"]/text()').get()
         if article_content:
+            if image_caption:
+                article_content = [x.replace(image_caption, '') for x in article_content]
+            if img_credit:
+                article_content = [x.replace(img_credit, '') for x in article_content]
             loader.add_value('article_content', article_content)
-        article_footnote = response.xpath('//*[contains(@class, "article__content-body n-content-body js-article__content-body")]/p[1]/*[self::em or self::a]//text()[not(ancestor::*[@class="n-content-layout__container"])]').getall()
+        article_footnote = None
         if article_footnote:
             loader.add_value('article_footnote', article_footnote)
-        article_footnote_2 = response.xpath('.//*[@id="site-content"]/div[3]/div[2]/p[last()-1]/em/text()').get()
+        article_footnote_2 = None
         if article_footnote_2:
             loader.add_value('article_footnote', article_footnote_2)
         yield loader.load_item()
@@ -131,30 +164,83 @@ class CNBCSpider(scrapy.Spider):
         resps = grequests.map(reqs)
         return resps
 
-
     def process_author(self, article_item, resps):
         authors = article_item['authors']
         for (auth, response) in zip(authors.keys(), resps):
             page_source = BeautifulSoup(response.text, 'lxml')
             try:
-                pos = page_source.find('div', attrs={'class': "sub-header__strapline"}).text.strip()
+                pos = page_source.find('span', attrs={'class': "RenderBioDetails-jobTitle"}).text.strip()
                 article_item['authors'][f'{auth}']['author_position'] = pos
             except:
                 pass
             try:
-                author_bio = page_source.find('div', attrs={'class': "sub-header__description"}).text
-                author_bio = normalize("NFKD", ''.join(map(str, author_bio)).replace('  ', ' ').strip())
+                author_bio = self.get_bio(response)
                 article_item['authors'][f'{auth}']['author_bio'] = author_bio
             except Exception as e:
-                print(f'error getting bio. #{e}')
+                try:
+                    author_bio = page_source.find('div', attrs={'class': "RenderBioDetails-bioText"}).text
+                    article_item['authors'][f'{auth}']['author_bio'] = author_bio
+                except Exception as e:
+                    print(f'error getting bio. #{e}')
             try:
-                article_item['authors'][f'{auth}']['author_email'] = page_source.find('a', attrs={
-                    'data-trackable': 'send-email'})['href'].replace('mailto:', '').strip()
+                article_item['authors'][f'{auth}']['author_fb'] = page_source.find('a', attrs={
+                    'class': 'icon-social_facebook'})['href'].strip()
             except:
                 pass
             try:
-                article_item['authors'][f'{auth}']['author_twitter'] = page_source.find('a', attrs={
-                    'data-trackable': 'twitter-page'})['href'].strip()
+                article_item['authors'][f'{auth}']['author_email'] = page_source.find('a', attrs={
+                    'class': 'icon-social_email'})['href'].strip()
             except:
                 pass
         return article_item
+
+    def get_bio(self, response):
+        soup = BeautifulSoup(response.content, "lxml")
+        dom = etree.HTML(str(soup))
+        js_script = dom.xpath('//script[contains(., "locationBeforeTransitions")]/text()')
+        # print(js_script)
+        if js_script:
+            txt = js_script[0]
+            start = txt.find('modules', txt.find('modules')+1) +10
+            end = index_of_nth(txt, 'column', 4) - 16
+            json_string = txt[start:end]
+            # print(json_string)
+            try:
+                data = json.loads(json_string)
+                body = data.get('data').get('body')
+                content = body.get('content')
+                p_tags = content[0].get('children')
+                author_bio = []
+                for i in range(len(p_tags)):
+                    author_bio.append(''.join(map(str, p_tags[i].get('children'))))
+                author_bio = ''.join(author_bio).strip()
+                return author_bio
+            except:
+                end = index_of_nth(txt, 'column', 5) - 16
+                json_string = txt[start:end]
+                data = json.loads(json_string)
+                body = data.get('data').get('body')
+                content = body.get('content')
+                p_tags = content[0].get('children')
+                author_bio = []
+                for i in range(len(p_tags)):
+                    author_bio.append(''.join(map(str, p_tags[i].get('children'))))
+                author_bio = ''.join(author_bio).strip()
+                return author_bio
+
+        # js_script = response.xpath('//script[contains(., "locationBeforeTransitions")]/text()')
+        # if js_script:
+        #     txt = js_script.extract_first()
+        #     start = txt.find('modules', txt.find('modules')+1) +10
+        #     end = index_of_nth(txt, 'column', 4) - 16
+        #     json_string = txt[start:end]
+        #     data = json.loads(json_string)
+        #     body = data.get('data').get('body')
+        #     content = body.get('content')
+        #     p_tags = content[0].get('children')
+        #     author_bio = []
+        #     for i in range(len(p_tags)):
+        #         author_bio.append(''.join(map(str, p_tags[i].get('children'))))
+        #     author_bio = ' '.join(author_bio)
+        #     # print ("author_bio:", author_bio)
+        #     return author_bio

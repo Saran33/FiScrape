@@ -216,6 +216,14 @@ def bleach_html(text):
     text = text.replace('<p></p>', '').replace('<p> </p>', '').replace('<p> </p>', '').replace('<strong></strong>', '').replace('<em></em>', '')
     return [text]
 
+def remove_read_more(text):
+    return text.replace(' read more ', '')
+
+def remove_p_tspace(text):
+    return text.replace(' </p>', '</p>')
+
+def and_amp(text):
+    return text.replace('&amp;', '&')
 
 # Article Items:
 
@@ -481,15 +489,15 @@ class ReutersArtItem(Item):
         output_processor=Identity()
         )
     article_summary = Field(
-        input_processor=MapCompose(extract_headline),
+        input_processor=MapCompose(bleach_html, and_amp, extract_headline),
         output_processor=Join()
         )
     image_caption = Field(
-        input_processor=MapCompose(remove_articles),
+        input_processor=MapCompose(and_amp, remove_articles),
         output_processor=Join()
         )
     article_content = Field(
-        input_processor=MapCompose(bleach_html, remove_articles, remove_space),
+        input_processor=MapCompose(bleach_html, remove_read_more, remove_p_tspace, and_amp, remove_articles, remove_space),
         output_processor=Join()
         )
     article_footnote = Field(

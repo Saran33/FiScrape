@@ -5,6 +5,8 @@ from FiScrape.spiders.InsiderSpider import InsiderSpider
 from FiScrape.spiders.BBCSpider import BBCSpider
 # from FiScrape.spiders.WsjSpider import WsjSpider
 from FiScrape.spiders.ZhSpider import ZhSpider
+from FiScrape.spiders.CNBCSpider import CNBCSpider
+from FiScrape.spiders.ReutersSpider import ReutersSpider
 from FiScrape.search import query, start_date
 
 # scrapy runspider fiscrape.py
@@ -16,6 +18,8 @@ process.crawl(FtSpider)
 process.crawl(InsiderSpider)
 process.crawl(BBCSpider)
 process.crawl(ZhSpider)
+process.crawl(CNBCSpider)
+process.crawl(ReutersSpider)
 process.start()
 
 
