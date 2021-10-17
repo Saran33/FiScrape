@@ -1,10 +1,26 @@
 
+
+function main(splash, args)
+    splash:on_request(function(request)
+        if request.url:find('css') then
+            request.abort()
+        end
+    end)
+    splash.images_enabled = false
+    assert(splash:go(args.url))
+    splash:wait((5))
+    splash:select('button.SimplePaginator_next__15okP'):mouse_click()
+    splash:wait((5))
+    return splash:html()
+end
+
 scrapy shell --nolog
 html_url = 'https://www.zerohedge.com/search-content?qTitleBody=bitcoin&page=0'
 fetch(html_url)
 
-js_url = 'http://localhost:8050/render.html?url=https://www.zerohedge.com/search-content?qTitleBody=bitcoin&page=0'
+
 js_url  = 'http://localhost:8050/render.html?url=https://www.zerohedge.com/search-content?qTitleBody=bitcoin&page=2'
+js_url = 'http://localhost:8050/render.html?url=https://www.zerohedge.com/search-content?qTitleBody=bitcoin&page=0'
 
 fetch(js_url)
 

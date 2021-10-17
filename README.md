@@ -1,5 +1,5 @@
 # FiScrape
-
+![alt text](https://github.com/PWE-Capital/FiScrape/blob/Branch36/images/PWE_FiScrape_splash.png?raw=true)
 ### Financial news scraping and processing for machine learning. 
 `FiScrape` is a package for scraping financial news and applying natural langage processing for sentiment analysis. It leverages `scrapy`.
 
@@ -20,7 +20,7 @@ or
 `git clone https://github.com/Saran33/FiScrape.git`
 
 ### Dependencies
-FiScrape requires [Docker](https://docs.docker.com/desktop/), [Splash](https://splash.readthedocs.io/en/stable/install.html) and [Aquarium](https://github.com/TeamHG-Memex/aquarium) to scrape some websites that render in Javascript.
+FiScrape requires [Docker](https://docs.docker.com/desktop/), [Splash](https://splash.readthedocs.io/en/stable/install.html) and this fork of [Aquarium](https://github.com/Saran33/aquarium) to scrape some websites that render in Javascript.
 1. After pip installing FiScrape, download Docker at the above link.
 2. As per the above Splash installation docs, pull the splash image with:
 ##### Linux:
@@ -50,9 +50,9 @@ $ docker run -it -p 8050:8050 --rm scrapinghub/splash
  or `$ docker pull scrapinghub/splash` for OS X.
  3. Aquarium creates multiple Splash instances behind a HAProxy, in order to load balance parallel scrapy requests to a splash docker cluster. The instances collaborate to render a specific website. It may be necessary for preventing 504 errors (timeout) on some sites. It also speeds up the scraping of Javascript pages, and can also facilitate Tor proxies. To install Aquarium, navigate to your home directory and run the command:
  ```zsh
- cookiecutter gh:TeamHG-Memex/aquarium
+ cookiecutter gh:Saran33/aquarium
  ```
- Choose default settings, set user and password, set Tor to 0.
+ Choose default settings or whatever suits, splash_version: latest, set user and password, set Tor to 0.
  
  4. a. To start the container (without Acquarium):
  ##### Linux:
@@ -83,6 +83,10 @@ http://localhost:8036/
 2. Open a terminal and run:
 ```zsh
 python3 fiscrape.py 
+```
+#### To run FiScrape GUI:
+```zsh
+python3 fiscrape_gui.py
 ```
 3. You will be prompted to enter a search term and the earliest publish date from which to scrape.
 #### To scrape a specific site:
