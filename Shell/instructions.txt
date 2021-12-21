@@ -1,5 +1,5 @@
-scrapy genspider listings
-scrapy genspider listings www.centris.ca/en
+scrapy genspider ft
+scrapy genspider ft www.ft.com
 
 Copy post query request payload to:
 https://jsonformatter.curiousconcept.com/

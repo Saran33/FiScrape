@@ -180,7 +180,7 @@ or
 #### Add the task to crontab
 - Open crontab in nano text editor:
 `EDITOR=nano crontab -e`
-- Copy the contents of the `crontab_entry.sh` file into the nano editor.
+- Copy the last line of the `crontab_entry.sh` file into the nano editor (or create a similar one based on the examples in `crontab_entry.sh`).
 - Change the desirred frequency or fixed date/time for crawling.
 - Crontab timing format examples: https://crontab.guru/examples.html
 - Set the path to your local FiScrape outer directory:
