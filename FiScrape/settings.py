@@ -85,6 +85,7 @@ ITEM_PIPELINES = {
    # 'FiScrape.pipelines.TestSpiderPipeline': 90,
    # 'FiScrape.pipelines.FiScrapePipeline': 100,
    'FiScrape.pipelines.DuplicatesPipeline': 200,
+#    'FiScrape.pipelines.SendEmailPipeLine': 250,
    'FiScrape.pipelines.SaveArticlesPipeline': 300,
    # 'FiScrape.pipelines.SentimentPipeline': 400,
 }
@@ -131,3 +132,14 @@ AUTOTHROTTLE_DEBUG = True
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+# E-Mail Notification Settings
+MAIL_FROM = 'pwenewsalerts@gmail.com'
+MAIL_HOST = 'smtp.gmail.com'
+MAIL_PORT = 465
+MAIL_USER = 'pwenewsalerts@gmail.com'
+MAIL_PASS = 'pwecapitalnewsalerts123$'
+MAIL_TLS = True
+MAIL_SSL = True
+mail_list = ["saran.c@pwecapital.com"]
+cc_list = ['']
