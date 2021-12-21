@@ -1,9 +1,11 @@
 # FiScrape
-![alt text](https://github.com/PWE-Capital/FiScrape/blob/Branch36/images/PWE_FiScrape_splash.png?raw=true)
+![PWE FiScrape](https://github.com/PWE-Capital/FiScrape/blob/images/PWE_FiScrape_splash.png?raw=true)
 ### Financial news scraping and processing for machine learning. 
 `FiScrape` is a package for scraping financial news and applying natural langage processing for sentiment analysis. It leverages `scrapy`.
 
 A search term can be queried across numerous online news sources. The resulting scraped headlines and standfirsts (and optionally the full text), along with metadata, will be timestamped and stored for each publication, along with the author and other relevent data.
+
+It can be scheduled as a cronjob to run periodically. The sentiment scores are calculated and an email notificaion is sent for any new article containing a specified keyword.
 
 Each news source on a particular topic can be stored as a seperate feature for timeseries analysis. e.g. For Bitcoin, all FT articles with "Bitcoin" in the title and/or text can comprise one set of sentiment feature. WSJ articles could be another set feature. This facilitates sentiment analysis on each publication individually, to see which, if any, yield the highest Information Coefficient or other measures of predictive merit.
 
@@ -141,6 +143,89 @@ VADER (Valence Aware Dictionary and sEntiment Reasoning lexicon-based sentiment 
 - `neutral`
 - `positive`
 The `negative`,`neutral` and `positive` scores are ratios describing the proportion of the text that falls into each category (so they should sum to 1, or close to it with floats).
+
+### Scheduling
+- FiScrape can be scheduled to run periodically, as a cron job in the cron table, either on a remote Linux server or on a local machine (Linux or MacOS).
+- In order to schedule the scraper:
+
+#### Add conda to shell
+(if using a conda env to run FiScrape)
+- Activate anaconda to shell:
+`echo $SHELL`
+`conda init <SHELL_NAME>`
+e.g.
+`conda init zsh`
+or
+`conda init bash`
+
+#### Add your environment to the fiscrape.sh script
+- Find base conda path:
+`conda info | grep -i 'base environment'`
+- Paste it into the script as the source, followed by `/etc/profile.d/conda.sh`
+- e.g. `source CONDA_PATH/etc/profile.d/conda.sh`
+
+- Add the name of your virtualenv or conda environment to the script: e.g. `conda activate pweenv` for conda or `source pweenv/bin/activate` for virutalenv.
+
+#### Make the script executable
+`chmod +x fiscrape.sh`
+
+#### Turn on Splash Cluster
+- In a seperate shell, wherever your aquarium folder is, in aquarium folder, run:
+`cd ./aquarium`
+`docker-compose up`
+
+#### Test the bash script
+`./fiscrape.sh`
+
+#### Add the task to crontab
+- Open crontab in nano text editor:
+`EDITOR=nano crontab -e`
+- Copy the contents of the `crontab_entry.sh` file into the nano editor.
+- Change the desirred frequency or fixed date/time for crawling.
+- Crontab timing format examples: https://crontab.guru/examples.html
+- Set the path to your local FiScrape outer directory:
+
+##### Add the fiscrape.sh file path to the script:
+- In the main FiScrape directory, open a shell and enter `pwd`. Copy the path.
+- Add it to `FISCRAPE_PATH` in the fiscrape.sh file.
+- Save the file (in nano, CTRL+X and then Y).
+
+#### To check existing cronjobs:
+`crontab -l`
+
+#### Check if it ran:
+If it ran, it will output `zlog.txt` to the FiScrape dir, and `FiScrape.db` will be saved to the sqllite_files dir (if none exists already).
+Alternatively, check with commands:
+`whereis syslog`
+`grep fiscrape.sh” /var/log/cron`
+`tail -f /usr/bin/syslog | grep CRON`
+
+### Email Notifications
+Email notifications will be sent every time a new article is published, containing the selected keyword. To monitor multiple keywords, set up crontab entries for each keyword by copying the above steps. Each new article will be sent in a sperate email alert, with the headline as the Subject line, the body containing the keyword, article source, headline, snippet/standfirst, article link, and sentiment scores. 
+- If the body of the article was accessible (not paywalled for FiScrape), the sentiment scores are calculated for the headline and body. If not, the sentiment scores are based on the headline and snippet/standfirst, and the email will mention this caveat benath the scores. e.g.
+![Email with sentiment scores based on entire article](https://github.com/PWE-Capital/FiScrape/blob/images/FiScrape_email_example?raw=true)
+![Email with sentiment scores based on article snippet](https://github.com/PWE-Capital/FiScrape/blob/images/FiScrape_email_example_snippet?raw=true)
+
+To set up emails:
+- Create a new Gmail or other email account.
+For Gmail:
+- Allow less secure apps: https://myaccount.google.com/security
+- Allow the gmail account: https://accounts.google.com/b/0/displayunlockcaptcha
+
+#### Configure Email Settings
+- In `FiScrape/FiScrape/settings.py`, change the email settings at the bottom of the file.
+```python
+MAIL_FROM = 'youralertemailaddress@gmail.com'  # the 'from address'
+MAIL_HOST = 'smtp.gmail.com'  # the SMTP server of your email provider
+MAIL_PORT = 465  # post 465 is used for Gmail SSL, posrt 587 is used for Gmail TLS
+MAIL_USER = 'youralertemailaddress@gmail.com'  # username for the 'from address'
+MAIL_PASS = 'yourSecretpassword'
+MAIL_TLS = True  # set to True if using TLS
+MAIL_SSL = True # set to True if using SSL
+mail_list = ["user1@pwecapital.com", "user2@pwecapital.com"]  # The alert recipients, sperated by commas
+cc_list = ["user3@pwecapital.com", "user4@pwecapital.com"] # The alert CC recipients, sperated by commas ( Set to [''] if no one is to be cc'd)
+```
+- Emails will be sent whenever FiScrape is run, if any new articles are found.
 
 ### ML Pipeline Example
 In the `NLP_Trading_Example.ipynb` notebook, there is an example of how to use either the Python libraries Pandas and SQLAlchemy to retrrieve the data. Pandas can accept SQL queries. The example function creates a temporary DB table of sentiment scores, for a given publication. It then uses the temp table to form a Pandas DataFrame. That function can be called recursively for each source/publication in the DB, to generate individual sentiment features for each source.

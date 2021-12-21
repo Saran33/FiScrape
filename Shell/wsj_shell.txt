@@ -1,0 +1,195 @@
+
+Check for JS: in cchrome dev > Network mode, then from dropdown, click "Slow 3G."
+Reset it if the page is rendering JS. (or just close dev to rset it)
+F1 for settings > Debugger > disable JS.
+Reload page with dev open.
+
+scrapy shell "https://www.wsj.com/search?query=bitcoin&mod=searchresults_viewallresults/"
+
+/api/content/v2/query?page=0"
+https://wsj.com//api/content/v2/query?page=0
+
+response.css('head').get()
+body = response.css('body')
+root = body.xpath('//div[@id="root"]')
+
+response.xpath('//body/div[@id="root"]/div/div/div[class="')
+
+div = response.xpath('//*[@id="main"]/div[5]')
+div.xpath('//*')
+div.xpath('//a/@href')
+div.xpath('//text()')
+
+div.css('*::text')
+//*[@id="main"]/div[4]/div/text()
+
+response.xpath('//*[@id="main"]/div[5]/(descendant::text() | following::text())')
+response.xpath('//*[@id="main"]/div[5]/(descendant::text() | following::text())').extract()
+
+response.xpath('//body/div[@id="root"]/div/div/div/div[2]/div[1]/div[1]/main').getall()
+response.xpath('//body/div[@id="root"]/div/div/div/div[2]/div[1]/div[1]/main/div').getall()
+response.xpath('//body/div[@id="root"]/div/div/div/div[2]/div[1]/div[1]/main/div[not(@*)]').getall()
+response.xpath('//body/div[@id="root"]/div/div/div/div[2]/div[1]/div[1]/main/div[contains(article)]').getall()
+response.xpath('//body/div[@id="root"]/div/div/div/div[2]/div[1]/div[1]/main/div[contains(@class="WSJTheme--story--XB4V2mLz WSJTheme--overflow-visible--3OB31tWq WSJTheme--border-bottom--s4hYCt0s ")]').getall()
+
+response.xpath('//div[contains(@class,"WSJTheme--story--XB4V2mLz WSJTheme--overflow-visible--3OB31tWq WSJTheme--border-bottom--s4hYCt0s ")]')
+
+####
+main = response.xpath('//body/div[@id="root"]/div/div/div/div[2]/div[1]/div[1]/main')
+####
+main.xpath('//div[contains(@class,"WSJTheme--story--XB4V2mLz WSJTheme--overflow-visible--3OB31tWq WSJTheme--border-bottom--s4hYCt0s ")]')
+main.xpath('//div').extract()
+main.xpath('//div[contains(@class,"WSJTheme--headline--7VCzo7Ay ")]').extract()
+response.xpath('//*[@id="main"]/div[5]/article[1]/div/div[3]/h3/a/span').extract()
+
+response.xpath('//body/div[@id="root"]/div/div/div/div[2]/div[1]/div[1]/main/div[5]/node()')
+response.xpath('//body/div[@id="root"]/div/div/div/div[2]/div/div[1]/main/div[5]/article[1]')
+/html/body/div/div/div/div/div[2]/div/div[1]/main/div[5]/article[1]
+
+main = body.css('div main.main').getall()
+body.css('div.').getall()
+
+main = response.xpath('//div/main[@id="main"]')
+body.xpath('//div//text()').getall()
+body.css("a::attr(href)").getall()
+main.xpath('//div[class="style--grid--SxS2So51 style--full-width--105xgnPD style--small-grid--b5qMSV2T "]/article[@class="WSJTheme--story--XB4V2mLz WSJTheme--overflow-visible--3OB31tWq WSJTheme--border-bottom--s4hYCt0s "]')
+main.css('div > article')
+response.xpath('//div/main[@id="main"]/a/datetime()')
+response.css('#root > div > div > div > div.WSJTheme--margin-bottom--2-lor3Ur.styles--margin-bottom--1qLtxtgQ > div.WSJTheme--skip--of7EbS8X').get()
+response.xpath("///body/div/div/div/div/main").getall()
+
+/html/body/div/div/div/div/div[1]
+response.xpath("//article[@class='WSJTheme--story--XB4V2mLz WSJTheme--overflow-visible--3OB31tWq WSJTheme--border-bottom--s4hYCt0s ']")Theme--story--XB4V2mLz WSJTheme--overflow-visible--3OB31tWq WSJTheme--border-bottom--s4hYCt0s ']").get()
+snippets = response.xpath("//article[@class='WSJTheme--story--XB4V2mLz WSJTheme--overflow-visible--3OB31tWq WSJTheme--border-bottom--s4hYCt0s ']")
+
+response.css('article').get()
+snippets = response.css('article')
+snippets = response.css('div.o-teaser.o-teaser--article.o-teaser--small.o-teaser--has-image.js-teaser')
+
+# published_date
+snippets[0].css('time.o-teaser__timestamp-date::datetime').getall()
+snippets[0].css('div.o-teaser__timestamp time.o-teaser__timestamp-date::attr(datetime)').getall()
+snippets[-1].css('div.o-teaser__timestamp time.o-teaser__timestamp-date::attr(datetime)').getall()
+snippets[5].css('div.o-teaser__timestamp time.o-teaser__timestamp-date::attr(datetime)').getall()
+
+snippets[].css('div.o-teaser__heading::attr(text)').getall()
+snippets[0].css('div.o-teaser__heading').getall()
+snippets[0].css("div.o-teaser__heading").getall()
+snippets[0].xpath("//div[@class='o-teaser__heading']/a/text()").getall()
+snippets[0].css("div.o-teaser__heading a.js-teaser-heading-link::text").getall()
+snippets[5].css("a.js-teaser-heading-link *::text").getall()
+headline = snippets[0].css("a.js-teaser-heading-link ::text").getall()
+headline = "".join(snippets[0].css("a.js-teaser-heading-link *::text").extract())
+headline = "".join(snippets[5].css("a.js-teaser-heading-link *::text").extract())
+
+
+standfirst = snippets[0].css("p.o-teaser__standfirst ::text").getall()
+standfirst = "".join(snippets[0].css("p.o-teaser__standfirst ::text").extract())
+standfirst = "".join(snippets[5].css("p.o-teaser__standfirst ::text").extract())
+
+tags = snippets[0].css("a.o-teaser__tag::text").getall()
+
+link = snippets[0].css("div.o-teaser__heading a::attr(href)").get()
+url = response.urljoin(next_page[0].extract())
+
+last_date = response.xpath('//div[@class="o-teaser__timestamp time.o-teaser__timestamp-date"]/a/datetime()')[-1].extract()
+first_date = snippets[0].css('div.o-teaser__timestamp time.o-teaser__timestamp-date::attr(datetime)').get()
+first_date = response.css('div.o-teaser__timestamp time.o-teaser__timestamp-date::attr(datetime)').extract_first()
+last_date = snippets[-1].css('div.o-teaser__timestamp time.o-teaser__timestamp-date::attr(datetime)').get()
+last_date = response.css('div.o-teaser__timestamp time.o-teaser__timestamp-date::attr(datetime)')[-1].extract()
+
+snippets[0].css('div.o-teaser__timestamp time.o-teaser__timestamp-date::attr(datetime)')
+
+next_page = snippets[0]("a.search-pagination__next-page a::attr(href)").get()
+snippets[0].xpath("//a[@class='search-pagination__next-page o-buttons o-buttons--secondary o-buttons-icon o-buttons-icon--arrow-right o-buttons--big o-buttons-icon--icon-only']/@href").getall()
+a = snippets[0].xpath("//a[@class='search-pagination__next-page o-buttons o-buttons--secondary o-buttons-icon o-buttons-icon--arrow-right o-buttons--big o-buttons-icon--icon-only']").getall()
+
+snippets[0].follow(a, callback=self.parse)
+
+next_page = response.xpath("//a[@class='search-pagination__next-page o-buttons o-buttons--secondary o-buttons-icon o-buttons-icon--arrow-right o-buttons--big o-buttons-icon--icon-only']/@href")
+url = response.urljoin(next_page[0].extract())
+
+
+article_link = snippets[0].css("div.o-teaser__heading a::attr(href)").get()
+article_link = response.urljoin(article_link)
+fetch(url[, redirect=True])
+article_page = fetch(article_link, redirect=True)
+article_page = response.follow(article_link)
+article_page = scrapy.Request(article_link)
+# or:
+scrapy shell 'https://www.ft.com/content/dea06530-01a8-4e9e-90e4-d5edbf856505' --nolog
+head = response.css('head').get()
+response.css('body').get()
+body = response.css('body')
+div  = response.css('div').get()
+
+layout = response.css('div.n-layout').getall()
+layout = response.css('div.n-layout')
+layout.css('p').getall()
+layout.css('article').getall()
+layout.css('article.site-content').getall()
+
+layout.css('p.article-info__byline').getall()
+response.css('p.article-info__byline').getall()
+article-info
+
+response.xpath("//div[@class='article__content']").get()
+content = response.xpath("//div[@class='article__content']")
+
+article = body.css('article.article.article-grid.article-grid--no-full-width-graphics').getall()
+body.css('li.o-header__drawer-menu-item').get()
+content  = body[0].css('.div').getall()
+
+
+article = response.xpath("//article")
+
+<h1 class="o-topper__headline o-topper__headline--basic"><span class="article-classifier__gap">Finance industry warns against ‘unnecessarily restrictive’ crypto capital rules</span></h1>
+
+authors = body.css(".div.a.n-content-tag--author::text").getall()
+
+authors = response.css("a.n-content-tag--author::text").getall()
+authors = article.css("a.n-content-tag--author::text").getall()
+author_urls = article.css("a.n-content-tag--author::attr(href)").getall()
+
+scrapy shell 'https://www.ft.com/laurence-fletcher/' --nolog
+author = response.xpath("//div[@class='sub-header sub-header--author']")
+bio = author.css("div.sub-header__strapline::text").get()
+
+email = response.xpath("//a[@class='sub-header__content__link sub-header__content__link--email-address']/@href").get()
+twitter = response.xpath("//a[@class='sub-header__content__link sub-header__content__link--twitter-handle']/@href").get()
+
+<a class="search-pagination__next-page o-buttons o-buttons--secondary o-buttons-icon o-buttons-icon--arrow-right o-buttons--big o-buttons-icon--icon-only" href="?q=bitcoin&amp;page=2&amp;sort=date" rel="nofollow" data-trackable="next-page">
+						<span class="o-buttons-icon__label">Next page</span>
+					</a>
+
+LOGIN::
+https://accounts.ft.com/login?location=https%3A%2F%2Fwww.ft.com
+
+
+scrapy crawl ft
+scrapy crawl ft -o output.csv -t csv
+
+#Access DB:
+sqlite3 FiScrape.db
+.tables
+.schema article
+.schema sentiment
+select * from article limit 3;
+.quit
+
+BEGIN;
+DROP TABLE sentiment;
+DROP TABLE temp_sent;
+COMMIT;
+
+BEGIN;
+SET NOCOUNT ON
+CREATE TEMP TABLE temp_sent AS SELECT published_date, id FROM article WHERE article.source_id = (SELECT rowid FROM Source WHERE name = 'ft');
+.schema temp_sent
+CREATE TEMP TABLE temp_sent2 AS SELECT temp_sent.id, published_date, subjectivity, polarity FROM temp_sent INNER JOIN snip_blob ON snip_blob.article_id = temp_sent.id;
+.schema temp_sent2
+CREATE TEMP TABLE Sentiment AS SELECT temp_sent2.id, published_date, subjectivity, polarity, compound, negative, neutral, positive FROM temp_sent2 INNER JOIN snip_vader ON snip_vader.article_id = temp_sent2.id;
+.schema sentiment
+SELECT * FROM sentiment;
+COMMIT;
+.q
