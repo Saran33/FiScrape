@@ -1,5 +1,5 @@
 # FiScrape
-![PWE FiScrape](https://github.com/PWE-Capital/FiScrape/blob/images/PWE_FiScrape_splash.png?raw=true)
+![PWE FiScrape](https://github.com/PWE-Capital/FiScrape/blob/master/images/PWE_FiScrape_splash.png?raw=true)
 ### Financial news scraping and processing for machine learning. 
 `FiScrape` is a package for scraping financial news and applying natural langage processing for sentiment analysis. It leverages `scrapy`.
 
@@ -14,12 +14,12 @@ Additionally, features may be further segmented by author.
 Generated features can be stored locally as CSV or in a database using SQLAlchemy. The scraper can be set to run periodically.
 
 The repository can be found at:
-[Github-FiScrape](https://github.com/Saran33/FiScrape/)
+[Github-FiScrape](https://github.com/PWE-Capital/FiScrape/)
 
 #### To install from git:
-`pip install git+git://github.com/Saran33/FiScrape.git`
+`pip install git+git://github.com/PWE-Capital/FiScrape.git`
 or
-`git clone https://github.com/Saran33/FiScrape.git`
+`git clone https://github.com/PWE-Capital/FiScrape.git`
 
 ### Dependencies
 FiScrape requires [Docker](https://docs.docker.com/desktop/), [Splash](https://splash.readthedocs.io/en/stable/install.html) and this fork of [Aquarium](https://github.com/Saran33/aquarium) to scrape some websites that render in Javascript.
@@ -203,8 +203,8 @@ Alternatively, check with commands:
 ### Email Notifications
 Email notifications will be sent every time a new article is published, containing the selected keyword. To monitor multiple keywords, set up crontab entries for each keyword by copying the above steps. Each new article will be sent in a sperate email alert, with the headline as the Subject line, the body containing the keyword, article source, headline, snippet/standfirst, article link, and sentiment scores. 
 - If the body of the article was accessible (not paywalled for FiScrape), the sentiment scores are calculated for the headline and body. If not, the sentiment scores are based on the headline and snippet/standfirst, and the email will mention this caveat benath the scores. e.g.
-![Email with sentiment scores based on entire article](https://github.com/PWE-Capital/FiScrape/blob/images/FiScrape_email_example?raw=true)
-![Email with sentiment scores based on article snippet](https://github.com/PWE-Capital/FiScrape/blob/images/FiScrape_email_example_snippet?raw=true)
+![Email with sentiment scores based on entire article](https://github.com/PWE-Capital/FiScrape/blob/master/images/FiScrape_email_example.png?raw=true)
+![Email with sentiment scores based on article snippet](https://github.com/PWE-Capital/FiScrape/blob/master/images/FiScrape_email_example_snippet.png?raw=true)
 
 To set up emails:
 - Create a new Gmail or other email account.
@@ -232,7 +232,7 @@ In the `NLP_Trading_Example.ipynb` notebook, there is an example of how to use e
 
 The example aggregates the data into hourly candles, for the purposes of illustration. That could be useful for generating lagged or resampled sentiment features, although that may not be necessay if using a model such as a LSTM neural network.
 
-The notebook includes some trend indicators such as a Kalman filter, and volatility features such as Bollinger bands and a Yang-Zhang estimator. Numerous Python libraries need to be pip installed to run this file. Installing [Github-PWE_Analysis](https://github.com/Saran33/pwe_analysis/) should satisfy the dependencies. You will also need to install the C++ [TA-Lib](https://github.com/mrjbq7/ta-lib)
+The notebook includes some trend indicators such as a Kalman filter, and volatility features such as Bollinger bands and a Yang-Zhang estimator. Numerous Python libraries need to be pip installed to run this file. Installing [Github-PWE_Analysis](https://github.com/PWE-Capital/pwe_analysis/) should satisfy the dependencies. You will also need to install the C++ [TA-Lib](https://github.com/mrjbq7/ta-lib)
 
 The data is then passed to a preprocessing pipeline. The categorical featues are converted to one-hot encodings and the rest of the features are scaled.
 
