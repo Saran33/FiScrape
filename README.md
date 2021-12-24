@@ -194,7 +194,7 @@ or
 `crontab -l`
 
 #### Check if it ran:
-If it ran, it will output `zlog.txt` to the FiScrape dir, and `FiScrape.db` will be saved to the sqllite_files dir (if none exists already).
+If it ran, it will output `cronlog.txt` to the FiScrape/cronlog dir, and `FiScrape.db` will be saved to the sqllite_files dir (if none exists already).
 Alternatively, check with commands:
 `whereis syslog`
 `grep fiscrape.sh” /var/log/cron`

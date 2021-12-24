@@ -25,8 +25,22 @@ conda activate pwepip
 export LC_ALL=en_US.utf-8
 
 # run the spider (enter your search term. e.g. 'bitcoin'. 't' represents scraping articles published today only. The '\n' is a new line.)
+
+previous_instance_active () {
+  pgrep -f "printf 'bitcoin\nt' | python3 fiscrape.py" &>/dev/null;
+}
+
+if previous_instance_active
+then 
+  "Previous instance is still active at ${start_datetime}, aborting ... "
+  exit
+else
+#   $ENV printf "bitcoin\nt" | python3 fiscrape.py
+  printf "bitcoin\nt" | python3 fiscrape.py
+fi
+
 # $ENV printf "bitcoin\nt" | python3 fiscrape.py
-printf "bitcoin\nt" | python3 fiscrape.py
+# printf "bitcoin\nt" | python3 fiscrape.py
 
 # get the end date and time
 end_datetime=$(date '+%m_%d_%Y_%H_%M_%S')
